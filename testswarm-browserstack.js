@@ -1,6 +1,5 @@
-#!/opt/local/bin/node
-var http = require( "http" ),
-    BrowserStack = require( "browserstack" ),
+var http = require("http"),
+    BrowserStack = require("browserstack"),
     async = require("async")
     
 var TestSwarmBrowserStackInteg = {
