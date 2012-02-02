@@ -81,12 +81,12 @@ var TestSwarmBrowserStackInteg = {
         });
     },
     updateBrowsers: function(currentWorkers, neededWorkers){        
+        var start = [],
+        kill = [];
         if(self.options().verbose){
             console.log('----------- testswarm needs these useragent ids: -----------\n', neededWorkers, '\n');
             console.log('----------- current browserstack workers: -----------\n', currentWorkers, '\n');
         }
-        var start = [],
-        kill = [];
         
         //figure out what needs started and what needs killed
         for(i in self.browserMap){
@@ -100,13 +100,11 @@ var TestSwarmBrowserStackInteg = {
                     id : isStarted
                 });
             }
-        }        
-        
+        }
         console.log('workers to start:', JSON.stringify(start));        
         start.forEach(function(browser,i){        
             self.startWorker(browser, self.options().clientTimeout);
-        });        
-        
+        });
         console.log('workers to kill:', JSON.stringify(kill));
         kill.forEach(function(worker,i){
             self.killWorker(worker);
@@ -134,7 +132,6 @@ var TestSwarmBrowserStackInteg = {
             //TODO handle err
             self.updateBrowsers(results.current, results.needed);
         });
-        
     },
     killWorker: function(worker){
         var client = self.client();
@@ -153,11 +150,9 @@ var TestSwarmBrowserStackInteg = {
                 console.log('could not get workers from browserstack');
                 return;
             }
-            
             if(!workers || workers.length<1){
                 console.log('no workers running or queued');
             }
-            
             workers.forEach(function(worker,i){
                 self.killWorker(worker);
             });
@@ -168,7 +163,7 @@ var TestSwarmBrowserStackInteg = {
 var self = TestSwarmBrowserStackInteg;
 
 module.exports = {
-	getNeeded: TestSwarmBrowserStackInteg.getNeeded,
+    getNeeded: TestSwarmBrowserStackInteg.getNeeded,
     run: TestSwarmBrowserStackInteg.run,
     killWorker: TestSwarmBrowserStackInteg.killWorker,
     killAll: TestSwarmBrowserStackInteg.killAll,
