@@ -1,177 +1,79 @@
-#!/opt/local/bin/node
-var http = require( "http" ),
-    BrowserStack = require( "browserstack" ),
-    async = require("async")
-    
-var TestSwarmBrowserStackInteg = {
-    //we need to map browser definitions between testswarm and browserstack
-    //testswarm useragent id : browserstack definition
-    browserMap: {
-        1: {name:'chrome', version:'15.0'},
-        3: {name:'firefox', version:'3.6'},
-        7: {name:'firefox', version:'7.0'},
-        8: {name:'ie', version:'6.0'},
-        9: {name:'ie', version:'7.0'},
-        10: {name:'ie', version:'8.0'},
-        11: {name:'ie', version:'9.0'},
-        12: {name:'ie', version:'10.0'},
-        13: {name:'opera', version:'11.1'},
-        14: {name:'opera', version:'11.5'},
-        15: {name:'safari', version:'4.0'},
-        16: {name:'safari', version:'5.0'},
-        17: {name:'safari', version:'5.1'}
-    },
-    options: function(options){
-        if(!options){
-            return self._options;
-        }
-        self._options = options;
-    },
-    client: function(){
-        if(self._client){
-            return self._client;
-        }
-        self._client = BrowserStack.createClient({
-            username: self.options().user,
-            password: self.options().pass
-        });
-        return self._client;
-    },
-    //retrivies the browsers (testwarm calles these useragent id's) required by testswarm
-    getNeeded: function (callback){
-        var req = http.request({
-            host: self.options().swarmUrl,
-            path: '/index.php?state=getneeded',
-            method: 'GET'   
-        },function(res){
-            var resp = "";
-            res.setEncoding('utf8');
-            res.on('data', function(chunk){
-                    resp += chunk;
-            });
-            res.on('end', function(){
-                var neededUseragents = JSON.parse(resp);
-                callback(null, neededUseragents);
-            });
-            //TODO handle res.clientError event
-        });
-        req.end();
-    },
-    isWorkerStarted: function(browser, workers){    
-        for(var i=0,len=workers.length;i<len;i++){
-            var worker = workers[i];
-            if(worker.browser.name === browser.name && worker.browser.version === browser.version){
-                return worker.id;
-            }
-        }
-        return false;
-    },
-    startWorker: function(browser, clientTimeout){
-        var client = self.client();
-        client.createWorker({
-            browser: browser.name,
-            version: browser.version,
-            url: self.options().spawnUrl,
-            timeout: clientTimeout
-        }, function(err,worker){
-            if(err){
-                console.log('error spawning browser:', browser, err);
-            }else{
-                console.log('started browser: ', browser, worker);
-            }
-        });
-    },
-    updateBrowsers: function(currentWorkers, neededWorkers){        
-        if(self.options().verbose){
-            console.log('----------- testswarm needs these useragent ids: -----------\n', neededWorkers, '\n');
-            console.log('----------- current browserstack workers: -----------\n', currentWorkers, '\n');
-        }
-        var start = [],
-        kill = [];
-        
-        //figure out what needs started and what needs killed
-        for(i in self.browserMap){
-            var isStarted = self.isWorkerStarted( self.browserMap[i], currentWorkers );
-            var isNeeded = neededWorkers.indexOf( parseInt(i) ) > -1 ? true : false;
-            if( isNeeded && isStarted === false ){
-                start.push( self.browserMap[i] );
-            }else if( isStarted && !isNeeded && self.options().kill ){
-                kill.push({
-                    browser : self.browserMap[i],
-                    id : isStarted
-                });
-            }
-        }        
-        
-        console.log('workers to start:', JSON.stringify(start));        
-        start.forEach(function(browser,i){        
-            self.startWorker(browser, self.options().clientTimeout);
-        });        
-        
-        console.log('workers to kill:', JSON.stringify(kill));
-        kill.forEach(function(worker,i){
-            self.killWorker(worker);
-        });
-    },
-    run: function(){
-        var client = self.client();
-        async.parallel({
-            current: function(callback){
-                client.getWorkers(function(err, resp){                    
-                    if(err){
-                        console.log('Error getting workers', err);    
-                    }
-                    callback(err, resp);
-                });
-            },
-            needed: function(callback){
-                self.getNeeded(function(err, resp){
-                    //TODO handle err
-                    callback(err, resp);
-                });
-            }
-        },
-        function(err, results) {
-            //TODO handle err
-            self.updateBrowsers(results.current, results.needed);
-        });
-        
-    },
-    killWorker: function(worker){
-        var client = self.client();
-        client.terminateWorker(worker.id || worker, function(err){
-            if(err){
-                console.log('could not kill worker', worker);
-                return;
-            }                
-            console.log('killed worker', worker);
-        });
-    },
-    killAll: function(){
-        var client = self.client();
-        client.getWorkers(function(err, workers){        
-            if(err){
-                console.log('could not get workers from browserstack');
-                return;
-            }
-            
-            if(!workers || workers.length<1){
-                console.log('no workers running or queued');
-            }
-            
-            workers.forEach(function(worker,i){
-                self.killWorker(worker);
-            });
-        });
-    }
-};
+# [testswarm-browserstack](http://jquery.com/) - Integration layer between TestSwarm and BrowserStack API
+==================================================
 
-var self = TestSwarmBrowserStackInteg;
+### This repo contains two parts:
+1. [testswarm-browserstack.js](https://github.com/clarkbox/testswarm-browserstack/blob/master/testswarm-browserstack.js) - abstraction of TestSwarm "getNeeded" endpoint, and Soctt Gonzales' Browserstack API. Used to spawn Browserstack workers required by TestSwarm.
+2. [testswarm-browserstack.cli.js](https://github.com/clarkbox/testswarm-browserstack/blob/master/testswarm-browserstack.cli.js) - nodejs CLI interface wrapper around the above JS.
 
-module.exports = {
-	getNeeded: TestSwarmBrowserStackInteg.getNeeded,
-    run: TestSwarmBrowserStackInteg.run,
-    killWorker: TestSwarmBrowserStackInteg.killWorker,
-    killAll: TestSwarmBrowserStackInteg.killAll,
-    options: TestSwarmBrowserStackInteg.options
-};
+### Dependencies:
+* [commander](https://github.com/visionmedia/commander.js)
+* [async](https://github.com/caolan/async)
+* [node-browserstack](https://github.com/scottgonzalez/node-browserstack)
+
+
+## testswarm-browserstack.js
+--------------------------------------
+### getNeeded(callback):
+* Returns the TestSwarm ["useragent ID's]"(https://github.com/jquery/testswarm/blob/master/config/useragents.sql)
+* parameters:
+* * function callback(error, useragnets)
+* * * error (object) - null if none
+* * * useragnets (interger array) - JSON array of useragendIDs
+
+### killWorker(workerId):
+Kill a single worker. Calls BrowserStack.terminateWorker()
+* parameters:
+* * workerId (integer) - BrowserStack Worker ID as returned by startWorker 
+
+### killAll()
+Kill all workers running on BrowserStack. 
+
+### options([options])
+<font color="red">Call this first!</font>get/set the options required to run. Passing in an object literal will set the options. calling without arguments will return the current options.
+#### Example options:
+'
+{
+    user: 'myUserId',
+    pass: 'myPassWurd',
+    swarmUrl: 'swarm.jquery.org',
+    spawnUrl: 'http://swarm.jquery.org/run',
+    verbose: false,
+    kill: true,
+    clientTimeout: 6000
+}
+'
+#### Option Definition:
+* user - BrowserStack username
+* pass - BrowserStack password
+* swarmUrl - the URL of the TestSwarm instance (where the getneeded endpoint lives)
+* spawnUrl - the URL to open when a BrowserStack worker starts
+* verbose - output more debug messages (all output via console.log())
+* kill - kill workers that are no longer in getNeeded output
+* clientTimeout - number of seconds to run a worker
+
+
+##  testswarm-browserstack.cli.js
+--------------------------------------
+this is a nodejs CLI interface wrapper around the above code. Use --help for all you need to know:
+
+'
+$ ./testswarm-browserstack.cli.js 
+
+  Usage: testswarm-browserstack.cli.js [options]
+
+  Options:
+
+    -h, --help                 output usage information
+    -V, --version              output the version number
+    --killAll                  kill all workers now
+    --killWorker [workerid]    kill worker
+    --getNeeded                return the workers required by testswarm
+    -k, --kill                 if --run specified, kill workers if they are no longer needed.
+    -r, --run                  start up workers required by browserstack
+    -u, --user [username]      browserstack username
+    -p, --pass [password]      browserstack password
+    -s, --swarmUrl [url]       testswarm URL of getneeded call
+    -w, --spawnUrl [url]       URL for browserstack workers to run
+    -v, --verbose              print more info
+    -t, --clientTimeout [min]  number of minuets to run each client (browserstack timeout)
+'
