@@ -1,8 +1,10 @@
-# [testswarm-browserstack](http://jquery.com/) - Integration layer between TestSwarm and BrowserStack API
+# [testswarm-browserstack](http://jquery.com/)
+# Integration layer between TestSwarm and BrowserStack API
 ==================================================
 
 ### This repo contains two parts:
-1. [testswarm-browserstack.js](https://github.com/clarkbox/testswarm-browserstack/blob/master/testswarm-browserstack.js) - abstraction of TestSwarm "getNeeded" endpoint, and Soctt Gonzales' Browserstack API. Used to spawn Browserstack workers required by TestSwarm.
+
+1. [testswarm-browserstack.js](https://github.com/clarkbox/testswarm-browserstack/blob/master/testswarm-browserstack.js) - abstraction of TestSwarm "getNeeded" endpoint, and Scott Gonz‡lez's Browserstack API. Use it to spawn Browserstack workers required by TestSwarm.
 2. [testswarm-browserstack.cli.js](https://github.com/clarkbox/testswarm-browserstack/blob/master/testswarm-browserstack.cli.js) - nodejs CLI interface wrapper around the above JS.
 
 ### Dependencies:
@@ -14,16 +16,16 @@
 ## testswarm-browserstack.js
 --------------------------------------
 ### getNeeded(callback):
-* Returns the TestSwarm ["useragent ID's]"(https://github.com/jquery/testswarm/blob/master/config/useragents.sql)
+* Returns the TestSwarm [useragent ID's](https://github.com/jquery/testswarm/blob/master/config/useragents.sql)
 * parameters:
-* * function callback(error, useragnets)
-* * * error (object) - null if none
-* * * useragnets (interger array) - JSON array of useragendIDs
+     * function callback(error, useragnets)
+          * error (object) - null if none
+          * useragnets (interger array) - JSON array of useragendIDs
 
 ### killWorker(workerId):
 Kill a single worker. Calls BrowserStack.terminateWorker()
 * parameters:
-* * workerId (integer) - BrowserStack Worker ID as returned by startWorker 
+     * workerId (integer) - BrowserStack Worker ID as returned by startWorker 
 
 ### killAll()
 Kill all workers running on BrowserStack. 
@@ -57,8 +59,6 @@ Kill all workers running on BrowserStack.
 this is a nodejs CLI interface wrapper around the above code. Use --help for all you need to know:
 
 '
-$ ./testswarm-browserstack.cli.js 
-
   Usage: testswarm-browserstack.cli.js [options]
 
   Options:
