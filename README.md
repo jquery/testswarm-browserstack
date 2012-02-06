@@ -1,10 +1,10 @@
 # [testswarm-browserstack](http://jquery.com/)
-# Integration layer between TestSwarm and BrowserStack API
+This is a light weight integration layer between [TestSwarm](https://github.com/jquery/testswarm) and [BrowserStack](http://www.browserstack.com/). Use it to spawn BrowserStack workers needed by TestSwarm on demand.
 ==================================================
 
 ### This repo contains two parts:
 
-1. [testswarm-browserstack.js](https://github.com/clarkbox/testswarm-browserstack/blob/master/testswarm-browserstack.js) - abstraction of TestSwarm "getNeeded" endpoint, and Scott Gonz‡lez's Browserstack API. Use it to spawn Browserstack workers required by TestSwarm.
+1. [testswarm-browserstack.js](https://github.com/clarkbox/testswarm-browserstack/blob/master/testswarm-browserstack.js) - abstraction of TestSwarm "getNeeded" endpoint, and Scott Gonz‡lez's BrowserStack API. Use it to spawn BrowserStack workers required by TestSwarm.
 2. [testswarm-browserstack.cli.js](https://github.com/clarkbox/testswarm-browserstack/blob/master/testswarm-browserstack.cli.js) - nodejs CLI interface wrapper around the above JS.
 
 ### Dependencies:
@@ -67,13 +67,13 @@ this is a nodejs CLI interface wrapper around the above code. Use --help for all
     -V, --version              output the version number
     --killAll                  kill all workers now
     --killWorker [workerid]    kill worker
-    --getNeeded                return the workers required by testswarm
+    --getNeeded                return the workers required by TestSwarm
     -k, --kill                 if --run specified, kill workers if they are no longer needed.
-    -r, --run                  start up workers required by browserstack
-    -u, --user [username]      browserstack username
-    -p, --pass [password]      browserstack password
-    -s, --swarmUrl [url]       testswarm URL of getneeded call
-    -w, --spawnUrl [url]       URL for browserstack workers to run
+    -r, --run                  start up workers required by BrowserStack
+    -u, --user [username]      BrowserStack username
+    -p, --pass [password]      BrowserStack password
+    -s, --swarmUrl [url]       TestSwarm URL of getneeded call
+    -w, --spawnUrl [url]       URL for BrowserStack workers to run
     -v, --verbose              print more info
-    -t, --clientTimeout [min]  number of minuets to run each client (browserstack timeout)
+    -t, --clientTimeout [min]  number of minuets to run each client (BrowserStack timeout)
 '
