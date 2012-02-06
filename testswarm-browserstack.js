@@ -1,7 +1,6 @@
 var http = require("http"),
     BrowserStack = require("browserstack"),
-    async = require("async")
-    
+    async = require("async");
 var TestSwarmBrowserStackInteg = {
     //we need to map browser definitions between testswarm and browserstack
     //testswarm useragent id : browserstack definition
@@ -41,12 +40,12 @@ var TestSwarmBrowserStackInteg = {
         var req = http.request({
             host: self.options().swarmUrl,
             path: '/index.php?state=getneeded',
-            method: 'GET'   
-        },function(res){
+            method: 'GET'
+        }, function(res){
             var resp = "";
             res.setEncoding('utf8');
             res.on('data', function(chunk){
-                    resp += chunk;
+                resp += chunk;
             });
             res.on('end', function(){
                 var neededUseragents = JSON.parse(resp);
@@ -56,7 +55,7 @@ var TestSwarmBrowserStackInteg = {
         });
         req.end();
     },
-    isWorkerStarted: function(browser, workers){    
+    isWorkerStarted: function(browser, workers){
         for(var i=0,len=workers.length;i<len;i++){
             var worker = workers[i];
             if(worker.browser.name === browser.name && worker.browser.version === browser.version){
@@ -80,28 +79,27 @@ var TestSwarmBrowserStackInteg = {
             }
         });
     },
-    updateBrowsers: function(currentWorkers, neededWorkers){        
+    updateBrowsers: function(currentWorkers, neededWorkers){
         var start = [],
         kill = [];
         if(self.options().verbose){
-            console.log('----------- testswarm needs these useragent ids: -----------\n', neededWorkers, '\n');
-            console.log('----------- current browserstack workers: -----------\n', currentWorkers, '\n');
+            console.log('testswarm needs these useragent ids:\n', JSON.stringify(neededWorkers));
+            console.log('current browserstack workers:\n', JSON.stringify(currentWorkers));
         }
-        
         //figure out what needs started and what needs killed
         for(i in self.browserMap){
-            var isStarted = self.isWorkerStarted( self.browserMap[i], currentWorkers );
-            var isNeeded = neededWorkers.indexOf( parseInt(i) ) > -1 ? true : false;
-            if( isNeeded && isStarted === false ){
-                start.push( self.browserMap[i] );
-            }else if( isStarted && !isNeeded && self.options().kill ){
+            var isStarted = self.isWorkerStarted(self.browserMap[i], currentWorkers);
+            var isNeeded = neededWorkers.indexOf(parseInt(i)) > -1 ? true : false;
+            if(isNeeded && isStarted === false){
+                start.push(self.browserMap[i]);
+            }else if(isStarted && !isNeeded && self.options().kill){
                 kill.push({
-                    browser : self.browserMap[i],
-                    id : isStarted
+                    browser: self.browserMap[i],
+                    id: isStarted
                 });
             }
         }
-        console.log('workers to start:', JSON.stringify(start));        
+        console.log('workers to start:', JSON.stringify(start));
         start.forEach(function(browser,i){        
             self.startWorker(browser, self.options().clientTimeout);
         });
@@ -114,9 +112,9 @@ var TestSwarmBrowserStackInteg = {
         var client = self.client();
         async.parallel({
             current: function(callback){
-                client.getWorkers(function(err, resp){                    
+                client.getWorkers(function(err, resp){
                     if(err){
-                        console.log('Error getting workers', err);    
+                        console.log('Error getting workers', err);
                     }
                     callback(err, resp);
                 });
@@ -145,7 +143,7 @@ var TestSwarmBrowserStackInteg = {
     },
     killAll: function(){
         var client = self.client();
-        client.getWorkers(function(err, workers){        
+        client.getWorkers(function(err, workers){
             if(err){
                 console.log('could not get workers from browserstack');
                 return;
@@ -159,9 +157,7 @@ var TestSwarmBrowserStackInteg = {
         });
     }
 };
-
 var self = TestSwarmBrowserStackInteg;
-
 module.exports = {
     getNeeded: TestSwarmBrowserStackInteg.getNeeded,
     run: TestSwarmBrowserStackInteg.run,
