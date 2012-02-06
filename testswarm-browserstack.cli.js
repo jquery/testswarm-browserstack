@@ -7,7 +7,7 @@ program
     .option('--killAll', 'kill all workers now')
     .option('--killWorker [workerid]', 'kill worker', parseInt)
     .option('--getNeeded', 'return the workers required by testswarm')
-    .option('-k, --kill', 'if --run specified, kill workers if they are no longer needed.')  
+    .option('-k, --kill', 'if --run specified, kill workers if they are no longer needed.')
     .option('-r, --run', 'start up workers required by browserstack')
     .option('-u, --user [username]', 'browserstack username', '')
     .option('-p, --pass [password]', 'browserstack password', '')
@@ -16,9 +16,9 @@ program
     .option('-v, --verbose', 'print more info')
     .option('-t, --clientTimeout [min]', 'number of minuets to run each client (browserstack timeout)', parseInt)
     .parse(process.argv);
-  
+
 if(!process.argv[2]){
-    console.log( program.helpInformation() );
+    console.log(program.helpInformation());
     return;
 }
 
@@ -54,7 +54,7 @@ if(program.run){
         console.log('please set --swarmUrl and --spawnUrl. stopping.');
         return;
     }
-    
+
     //set default timeout if not set
     program.clientTimeout = program.clientTimeout || 10;
     //convert timeout to min
