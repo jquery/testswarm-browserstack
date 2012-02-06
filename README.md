@@ -15,10 +15,10 @@ This is a light weight integration layer between [TestSwarm](https://github.com/
 
 ## testswarm-browserstack.js
 --------------------------------------
-### 'options([options])'
+### options([options])
 Call this first! get/set the options required to run. Passing in an object literal will set the options. calling without arguments will return the current options.
 #### Example options:
-'
+<pre>
 {
     user: 'myUserId',
     pass: 'myPassWurd',
@@ -28,8 +28,8 @@ Call this first! get/set the options required to run. Passing in an object liter
     kill: true,
     clientTimeout: 6000
 }
-'
-#### 'Option Definition:'
+</pre>
+#### Option Definition:
 * user - BrowserStack username
 * pass - BrowserStack password
 * swarmUrl - the URL of the TestSwarm instance (where the getneeded endpoint lives)
@@ -38,7 +38,7 @@ Call this first! get/set the options required to run. Passing in an object liter
 * kill - kill workers that are no longer in getNeeded output
 * clientTimeout - number of seconds to run a worker
 
-### 'run()':
+### run():
 * Start the needed workers. If kill options is true, kill any running workers not needed.
 
 ### getNeeded(callback):
@@ -48,12 +48,12 @@ Call this first! get/set the options required to run. Passing in an object liter
           * error (object) - null if none
           * useragnets (interger array) - JSON array of useragendIDs
 
-### 'killWorker(workerId)':
+### killWorker(workerId):
 Kill a single worker. Calls BrowserStack.terminateWorker()
 * parameters:
      * workerId (integer) - BrowserStack Worker ID as returned by startWorker 
 
-### 'killAll()'
+### killAll()
 Kill all workers running on BrowserStack.
 
 
@@ -61,7 +61,7 @@ Kill all workers running on BrowserStack.
 --------------------------------------
 this is a nodejs CLI interface wrapper around the above code. Use --help for all you need to know:
 
-'
+<pre>
   Usage: testswarm-browserstack.cli.js [options]
 
   Options:
@@ -79,4 +79,4 @@ this is a nodejs CLI interface wrapper around the above code. Use --help for all
     -w, --spawnUrl [url]       URL for BrowserStack workers to run
     -v, --verbose              print more info
     -t, --clientTimeout [min]  number of minuets to run each client (BrowserStack timeout)
-'
+</pre>
