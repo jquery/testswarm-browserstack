@@ -1,6 +1,6 @@
 # [testswarm-browserstack](http://jquery.com/)
 This is a light weight integration layer between [TestSwarm](https://github.com/jquery/testswarm) and [BrowserStack](http://www.browserstack.com/). Use it to spawn BrowserStack workers needed by TestSwarm on demand.
-==================================================
+
 
 ### This repo contains two parts:
 
@@ -15,23 +15,8 @@ This is a light weight integration layer between [TestSwarm](https://github.com/
 
 ## testswarm-browserstack.js
 --------------------------------------
-### getNeeded(callback):
-* Returns the TestSwarm [useragent ID's](https://github.com/jquery/testswarm/blob/master/config/useragents.sql)
-* parameters:
-     * function callback(error, useragnets)
-          * error (object) - null if none
-          * useragnets (interger array) - JSON array of useragendIDs
-
-### killWorker(workerId):
-Kill a single worker. Calls BrowserStack.terminateWorker()
-* parameters:
-     * workerId (integer) - BrowserStack Worker ID as returned by startWorker 
-
-### killAll()
-Kill all workers running on BrowserStack. 
-
 ### options([options])
-<font color="red">Call this first!</font>get/set the options required to run. Passing in an object literal will set the options. calling without arguments will return the current options.
+Call this first! get/set the options required to run. Passing in an object literal will set the options. calling without arguments will return the current options.
 #### Example options:
 '
 {
@@ -52,6 +37,24 @@ Kill all workers running on BrowserStack.
 * verbose - output more debug messages (all output via console.log())
 * kill - kill workers that are no longer in getNeeded output
 * clientTimeout - number of seconds to run a worker
+
+### run():
+* Start the needed workers. If kill options is true, kill any running workers not needed.
+
+### getNeeded(callback):
+* Returns the TestSwarm [useragent ID's](https://github.com/jquery/testswarm/blob/master/config/useragents.sql)
+* parameters:
+     * function callback(error, useragnets)
+          * error (object) - null if none
+          * useragnets (interger array) - JSON array of useragendIDs
+
+### killWorker(workerId):
+Kill a single worker. Calls BrowserStack.terminateWorker()
+* parameters:
+     * workerId (integer) - BrowserStack Worker ID as returned by startWorker 
+
+### killAll()
+Kill all workers running on BrowserStack.
 
 
 ##  testswarm-browserstack.cli.js
