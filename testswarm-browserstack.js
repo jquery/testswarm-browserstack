@@ -6,7 +6,11 @@ var TestSwarmBrowserStackInteg = {
     //testswarm useragent id : browserstack definition
     browserMap: {
         1: {name:'chrome', version:'15.0'},
+        2: {name:'firefox', version:'3.5'},
         3: {name:'firefox', version:'3.6'},
+        4: {name:'firefox', version:'4.0'},
+        5: {name:'firefox', version:'5.0'},
+        6: {name:'firefox', version:'6.0'},
         7: {name:'firefox', version:'7.0'},
         8: {name:'ie', version:'6.0'},
         9: {name:'ie', version:'7.0'},
@@ -17,7 +21,8 @@ var TestSwarmBrowserStackInteg = {
         14: {name:'opera', version:'11.5'},
         15: {name:'safari', version:'4.0'},
         16: {name:'safari', version:'5.0'},
-        17: {name:'safari', version:'5.1'}
+        17: {name:'safari', version:'5.1'},
+        35: {name:'firefox', version:'10.0'}
     },
     options: function(options){
         if(!options){
