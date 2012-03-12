@@ -7,7 +7,7 @@ This is a light weight integration layer between [TestSwarm](https://github.com/
 testswarm-browserstack.cli.js --swarmUrl "swarm.jquery.org" --spawnUrl "http://swarm.jquery.org/run/"  --user "browserstackUserName" --pass "myPass@#$" --clientTimeout 15 --run --kill
 </pre>
 
-This above command will spawn (via --run) AND kill (via `--kill`) BrowSack workers as indicated by the TestSwarm `getNeeded` endpoint. This command should be executed on a regular interval, via CRON or other scheduler - for more short term requirements, see [node-cli-repeater](https://github.com/clarkbox/node-repeater))
+This above command will spawn (via --run) AND kill (via `--kill`) BrowSack workers as indicated by the TestSwarm `getneeded` endpoint. This command should be executed on a regular interval, via CRON or other scheduler - for more short term requirements, see [node-cli-repeater](https://github.com/clarkbox/node-repeater).
 
 
 In most cases, the `--kill` option should always accompany the `--run` option. This will ensure workers are not running idle, and depend on `--clientTimeout` option for works to die and allow other queued workers to start.
