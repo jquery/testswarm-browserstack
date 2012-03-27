@@ -51,7 +51,7 @@ Call this first! get/set the options required to run. Passing in an object liter
     user: 'myUserId',
     pass: 'myPassWurd',
     swarmUrl: 'swarm.jquery.org',
-    spawnUrl: 'http://swarm.jquery.org/run',
+    spawnUrl: 'http://swarm.jquery.org/run/_SWARM_USERNAME_',
     verbose: false,
     kill: true,
     clientTimeout: 6000
