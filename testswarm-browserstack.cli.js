@@ -17,47 +17,47 @@ program
     .option('-t, --clientTimeout [min]', 'number of minuets to run each client (browserstack timeout)', parseInt)
     .parse(process.argv);
 
-if(!process.argv[2]){
+if (!process.argv[2]) {
     console.log(program.helpInformation());
     return;
 }
 
 tsbs.options(program);
 
-if(program.getNeeded){
-    if(!program.swarmUrl){
+if (program.getNeeded) {
+    if (!program.swarmUrl) {
         console.log('please set --swarmUrl. stopping.');
         return;
     }
-    tsbs.getNeeded(function(needed){
+    tsbs.getNeeded(function (needed) {
         console.log(needed);
     });
 }
 
-if(program.run || program.killWorker || program.killAll){
-    if(!program.pass || !program.user){
+if (program.run || program.killWorker || program.killAll) {
+    if (!program.pass || !program.user) {
         console.log('please set --user and --pass. stopping.');
         return;
     }
 }
 
-if(program.killAll){
+if (program.killAll) {
     tsbs.killAll(program.killWorker);
 }
 
-if(program.killWorker){
+if (program.killWorker) {
     tsbs.killWorker(program.killWorker);
 }
 
-if(program.run){
-    if(!program.swarmUrl || !program.spawnUrl){
+if (program.run) {
+    if (!program.swarmUrl || !program.spawnUrl) {
         console.log('please set --swarmUrl and --spawnUrl. stopping.');
         return;
     }
 
-    //set default timeout if not set
+    // Set default timeout if not set
     program.clientTimeout = program.clientTimeout || 10;
-    //convert timeout to min
+    // Convert timeout to min
     program.clientTimeout = program.clientTimeout * 60;
     tsbs.run();
 }
