@@ -3,7 +3,7 @@ var program = require('commander'),
     tsbs = require('./testswarm-browserstack');
 
 program
-    .version('0.0.1')
+    .version('1.0')
     .option('--killAll', 'Kill all BrowserStack workers')
     .option('--killWorker [workerid]', 'Kill a BrowserStack worker by its worker ID', parseInt)
     .option('--getNeeded', 'Shows a list of browser IDs that have pending jobs in TestSwarm')
