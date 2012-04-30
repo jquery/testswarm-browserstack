@@ -22,11 +22,7 @@ In most cases, the `--kill` option should always accompany the `--run` option. T
 2. [testswarm-browserstack.cli.js](https://github.com/clarkbox/testswarm-browserstack/blob/master/testswarm-browserstack.cli.js) - nodejs CLI interface wrapper around it all. Allows for scripted or easier manual invocation of browsers.
 
 ### Dependencies:
-* [commander](https://github.com/visionmedia/commander.js)
-* [async](https://github.com/caolan/async)
-* [request](https://github.com/mikeal/request)
-* [node-browserstack](https://github.com/scottgonzalez/node-browserstack)
-
+Install via `npm install`.
 
 ## testswarm-browserstack.js
 --------------------------------------
