@@ -50,23 +50,28 @@ var TestSwarmBrowserStackInteg = {
 
     /**
      * Get a browserstack worker id based on a browserMap object
-     * @param browser Object: Object with property 'name' and 'version' (from browserMap)
-     * @param workers Array:
-     * @return Number|Boolean: worker id or false
+     * @param browser Object: Object with property 'name' and 'version' (from testswarm-browserstack.map)
+     * @param currentWorkers Array: List of worker objects (from browserstack.getWorkers)
+     * @return Array: Worker ids (can be empty if none found)
      */
-    getWorkerByUaId:function (browser, workers) {
+    getWorkersByBrowser:function (browser, currentWorkers) {
         var i, worker,
-            len = workers.length;
+            workers = [],
+            len = currentWorkers.length;
         for (i = 0; i < len; i++) {
-            worker = workers[i];
+            worker = currentWorkers[i];
             if (worker.browser.name === browser.name && worker.browser.version === browser.version) {
-                return worker.id;
+                workers.push(worker);
             }
         }
-        return false;
+        return workers;
     },
 
     startWorker:function (browser, clientTimeout) {
+        if (self.options().dryRun) {
+            console.log('[dryRun] startWorker', browser, clientTimeout);
+            return;
+        }
         var client = self.client();
         client.createWorker({
             browser:browser.name,
@@ -87,50 +92,92 @@ var TestSwarmBrowserStackInteg = {
      * @param swarmState Object: Info about current state of the testswarm
      */
     updateBrowsers:function (currentWorkers, swarmState) {
-        var browserID, stats, worker, killWorker,
-            start = [],
-            kill = [];
+        var browserID, stats, workers, doKillWorkers, i, len,
+            // Browsers needed by TestSwarm, includes browsers that have workers already
+            neededBrowsers = [],
+            // Browsers to be started. Must not be more than options().stackLimit
+            // May contain the same browser multiple times, this is expected behavior
+            startBrowsers = [],
+            // Workers that are no longer needed
+            killWorkers = [];
 
         if (self.options().verbose) {
-            console.log('testswarm needs these browsers:\n', swarmState.userAgents);
-            console.log('browserstack has these workers:\n', currentWorkers);
+            console.log('TestSwarm statistics:\n', (function () {
+                // Reduce big swarmState to just the user agent stats
+                var uaID, uaStats = {};
+                for (uaID in swarmState.userAgents) {
+                    uaStats[uaID] = swarmState.userAgents[uaID].stats;
+                }
+                return uaStats;
+            }()));
+            console.log('BrowserStack current workers:\n', currentWorkers);
         }
 
-        // Figure out what needs started and what needs killed
+        // Figure out which browsers are needed by TestSwarm and which should be killed
         for (browserID in browserMap) {
             if (!swarmState.userAgents[browserID]) {
                 continue;
             }
             stats = swarmState.userAgents[browserID].stats;
-            worker = self.getWorkerByUaId(browserMap[browserID], currentWorkers);
-            killWorker = false;
-            if (stats.onlineClients === 0 && stats.pendingRuns > 0) {
-                start.push(browserMap[browserID]);
-                if (worker && self.options().kill) {
+            workers = self.getWorkersByBrowser(browserMap[browserID], currentWorkers);
+            doKillWorkers = false;
+            if (stats.pendingRuns > 0) {
+                neededBrowsers.push(browserMap[browserID]);
+                if (stats.onlineClients === 0 && workers.length && self.options().kill) {
                     // There is an active worker but it is not in the swarm. This can
-                    // happen if the browser crashed. Kill the old worker.
-                    killWorker = true;
+                    // happen if the browser crashed. Kill the lost worker.
+                    doKillWorkers = true;
                 }
-            } else if (stats.pendingRuns === 0 && worker && self.options().kill) {
+            } else if (stats.pendingRuns === 0 && workers.length && self.options().kill) {
                 // Kill workers for browsers that no longer have pending runs
-                killWorker = true;
+                doKillWorkers = true;
             }
 
-            if (killWorker) {
-                kill.push({
-                    browser:browserMap[browserID],
-                    id:worker
-                });
+            if (doKillWorkers) {
+                killWorkers.push.apply(killWorkers, workers);
             }
         }
 
-        console.log('workers to kill:', kill);
-        kill.forEach(function (worker, i) {
+        // Figure out which of the needed browsers to start.
+        // Summary:
+        // * If the limit is lower than the number of needed browsers, then some
+        // workers won't be started, yet (if we would start them they'd only be
+        // stalled in browserstack's queue).
+        // * When the number of needed browsers has become less than limit, the loop
+        // will be reset one or more times so that more instances of the same browsers
+        // are started (e.g. 2 instances of IE6 and IE7).
+        i = currentWorkers.length - killWorkers.length;
+
+        if (self.options().verbose) {
+               console.log('BrowserStack limit:', self.options().stackLimit);
+               console.log('BrowserStack # workers (-kills):', i);
+        }
+
+        for (i = i < 0 ? 0 : i, len = neededBrowsers.length; i < len; i++) {
+            if (startBrowsers.length === self.options().stackLimit) {
+                break;
+            }
+
+            startBrowsers.push(neededBrowsers[i]);
+
+            // Array index starts at zero, -1 is last key.
+            // If this is the last key, reset the loop. We want to keep looping
+            // until we reach the stack limit.
+            if (i === len-1) {
+                // -1 instead of 0. Because after this loop, "i++" will run.
+                i = -1;
+            }
+        }
+
+        console.log('TestSwarm wants these browsers:', neededBrowsers);
+        console.log('BrowserStack workers to be killed:', killWorkers);
+        console.log('BrowserStack workers to be started:', startBrowsers);
+
+        killWorkers.forEach(function (worker, i) {
             self.killWorker(worker);
         });
 
-        console.log('browsers to start:', start);
-        start.forEach(function (browser, i) {
+        startBrowsers.forEach(function (browser, i) {
             self.startWorker(browser, self.options().clientTimeout);
         });
     },
@@ -165,7 +212,15 @@ var TestSwarmBrowserStackInteg = {
         });
     },
 
+    /**
+     * @param worker Object|Number: Either a worker object (as given by browerstack.getWorkers,
+     * used by tsbs.updateBrowsers), or the worker id directly (used by "cli.js --killWorker")
+     */
     killWorker:function (worker) {
+        if (self.options().dryRun) {
+            console.log('[dryRun] killWorker', worker);
+            return;
+        }
         var client = self.client();
         client.terminateWorker(worker.id || worker, function (err) {
             if (err) {

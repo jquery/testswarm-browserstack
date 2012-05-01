@@ -48,6 +48,8 @@ Call this first! get/set the options required to run. Passing in an object liter
 * swarmRunUrl - URL to the TestSwarm run page (including client name), for BrowserStack workers to open
 * verbose - Output more debug messages (all output via console.log)
 * kill - Kill BrowserStack workers if they are no longer needed
+* dryRun - Don't actually execute any browserstack worker "terminate" or "start". Only log what it would do. Intended for debugging or getting statistics.
+* stackLimit - How many workers can be running simultaneously in BrowserStack
 * clientTimeout - Number of minutes to run each client
 
 

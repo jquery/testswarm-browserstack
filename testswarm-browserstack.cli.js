@@ -9,18 +9,22 @@ program
     .option('--getNeeded', 'Shows a list of browser IDs that have pending jobs in TestSwarm')
     .option('--kill', 'Kill BrowserStack workers if they are no longer needed (Only if --run is also specified)')
     .option('--run', 'Start new workers in BrowserStack based on the swarm state')
+    .option('--dryRun', 'Use this option in combination with --kill, --run and/or --killAll. Will stop any action from taking place and only report what it would do in reality. Intended for debugging or getting statistics.')
     .option('-u, --user [username]', 'BrowserStack username', '')
     .option('-p, --pass [password]', 'BrowserStack password', '')
     .option('-v, --verbose', 'Output more debug messages (all output via console.log)')
     .option('--swarmUrl [url]', 'URL of TestSwarm root (without trailing slash)', '')
     .option('--swarmRunUrl [url]', 'URL to the TestSwarm run page (including client name), for BrowserStack workers to open', '')
-    .option('--clientTimeout [min]', 'Number of minutes to run each client (BrowserStack timeout defaults to 10 minutes)', parseInt)
+    .option('--stackLimit [workers]', 'How many workers can be running simultaneously in BrowserStack (default: 4 workers)', parseInt)
+    .option('--clientTimeout [min]', 'Number of minutes to run each client (default: 10 minutes)', parseInt)
     .parse(process.argv);
 
 if (!process.argv[2]) {
     console.log(program.helpInformation());
     return;
 }
+
+console.log('\n--\n-- testswarm-browserstack.cli.js: ' + new Date().toString() + '\n--');
 
 tsbs.options(program);
 
@@ -67,9 +71,10 @@ if (program.run) {
         return;
     }
 
-    // Set default timeout if not set
+    // Default options
+    program.stackLimit = program.stackLimit || 4;
     program.clientTimeout = program.clientTimeout || 10;
-    // Convert timeout to min
+    // Convert timeout to ming
     program.clientTimeout = program.clientTimeout * 60;
     tsbs.run();
 }

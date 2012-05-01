@@ -1,1 +1,4 @@
 node_modules
+testswarm-browserstack.run.log
+testswarm-browserstack.run.sh
+.DS_Store

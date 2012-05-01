@@ -1,2 +1,0 @@
-#this is an example script that could be run by cron on set interval.
-./testswarm-browserstack.cli.js --swarmUrl "http://swarm.jquery.org" --swarmRunUrl "http://swarm.jquery.org/run/swarmuser/" -p browserstackPass -u browserstackUser --run --kill --clientTimeout 15 -v >> ./testswarm-browserstack.log;
