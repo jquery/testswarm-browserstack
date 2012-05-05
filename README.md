@@ -11,18 +11,15 @@ This script is currently compatible with:
 testswarm-browserstack.cli.js --swarmUrl "http://swarm.jquery.org" --swarmRunUrl "http://swarm.jquery.org/run/exampleClientName"  --user "BrowserStackUser" --pass "myBrowserStackPass@#$" --run --kill
 </pre>
 
-This above command will spawn (via `--run`) AND kill (via `--kill`) BrowserStack workers as indicated by the TestSwarm `swarmstate` API. This command should be executed on a regular interval, via cron or other scheduler - for more short term requirements, see [node-cli-repeater](https://github.com/clarkbox/node-repeater).
+This above command will spawn (via `--run`) AND kill (via `--kill`) BrowserStack workers as indicated by the TestSwarm `swarmstate` API. This command should be executed on a regular interval, via cron or other scheduler - for more short term requirements, see [cli-repeat](https://github.com/clarkbox/cli-repeat) (command line utility to repeat a command at regular interval).
 
 
 In most cases, the `--kill` option should always accompany the `--run` option. This will ensure workers are not running idle (although eventually browserstack will still terminate idle workers after `clientTimeout`).
 
-## This repo contains two parts:
+## This repo contains two (main) parts:
 
-1. [testswarm-browserstack.js](https://github.com/clarkbox/testswarm-browserstack/blob/master/testswarm-browserstack.js) - Abstraction of TestSwarm API, and Scott González's BrowserStack API. Use it to spawn BrowserStack workers to keep your TestSwarm populated.
+1. [testswarm-browserstack.js](https://github.com/clarkbox/testswarm-browserstack/blob/master/testswarm-browserstack.js) - Abstraction of TestSwarm API, and Scott González's BrowserStack API. Use it to spawn BrowserStack workers to keep your TestSwarm populated from your own JS code.
 2. [testswarm-browserstack.cli.js](https://github.com/clarkbox/testswarm-browserstack/blob/master/testswarm-browserstack.cli.js) - nodejs CLI interface wrapper around it all. Allows for scripted or easier manual invocation of browsers.
-
-### Dependencies:
-Install via `npm install`.
 
 ## testswarm-browserstack.js
 --------------------------------------
@@ -70,8 +67,6 @@ Kill a single worker. Calls BrowserStack.terminateWorker()
 
 ### killAll()
 Kill all workers running on BrowserStack.
-
-
 
 ##  testswarm-browserstack.cli.js
 --------------------------------------
