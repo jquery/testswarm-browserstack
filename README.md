@@ -34,7 +34,7 @@ Call this first! get/set the options required to run. Passing in an object liter
     swarmRunUrl: 'http://c.example.org/testswarm/run/_SWARM_USERNAME_',
     verbose: false,
     kill: true,
-    clientTimeout: 6000
+    clientTimeout: 60
 }
 </pre>
 #### Option Definition:
@@ -47,7 +47,7 @@ Call this first! get/set the options required to run. Passing in an object liter
 * kill - Kill BrowserStack workers if they are no longer needed
 * dryRun - Don't actually execute any browserstack worker "terminate" or "start". Only log what it would do. Intended for debugging or getting statistics.
 * stackLimit - How many workers can be running simultaneously in BrowserStack
-* clientTimeout - Number of minutes to run each client
+* clientTimeout - Number of *seconds* to keep the worker online. The maximum supported by BrowserStack is 1800 seconds (30 minutes).
 
 
 ### getSwarmState(callback):
@@ -89,6 +89,6 @@ this is a nodejs CLI interface wrapper around testswarm-browserstack.js. Use --h
     -v, --verbose            Output more debug messages (all output via console.log)
     --swarmUrl [url]         URL of TestSwarm root (without trailing slash)
     --swarmRunUrl [url]      URL to the TestSwarm run page (including client name), for BrowserStack workers to open
-    --clientTimeout [min]    Number of minutes to run each client (BrowserStack timeout, defaults to 10 minutes)
+    --clientTimeout [sec]    Number of seconds to keep the worker online. Defaults to 10 minutes (600 seconds).
 
 </pre>

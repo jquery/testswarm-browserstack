@@ -73,8 +73,7 @@ if (program.run) {
 
     // Default options
     program.stackLimit = program.stackLimit || 4;
-    program.clientTimeout = program.clientTimeout || 10;
-    // Convert timeout to ming
-    program.clientTimeout = program.clientTimeout * 60;
+    program.clientTimeout = program.clientTimeout || 600;
+
     tsbs.run();
 }
