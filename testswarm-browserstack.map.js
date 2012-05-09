@@ -4,14 +4,15 @@
  * BrowserStack API: https://github.com/browserstack/api , http://api.browserstack.com/1/browsers
  */
 var map = {
-    'Chrome':{
+    'Chrome|17':{
+        name:'chrome',
+        version:'17.0'
+    },
+    'Chrome|18':{
         name:'chrome',
         version:'18.0'
     },
-    'Firefox|3|5':{
-        name:'firefox',
-        version:'3.5'
-    },
+    // 'Firefox|3|5': Not in browserstack anymore
     'Firefox|3|6':{
         name:'firefox',
         version:'3.6'
@@ -48,6 +49,14 @@ var map = {
         name:'firefox',
         version:'11.0'
     },
+    'Firefox|12':{
+        name:'firefox',
+        version:'12.0'
+    },
+    'Firefox|13':{
+        name:'firefox',
+        version:'13.0'
+    },
     'IE|6':{
         name:'ie',
         version:'6.0'
@@ -72,16 +81,28 @@ var map = {
         name:'opera',
         version:'11.1'
     },
+    'Opera|11|50':{
+        name:'opera',
+        version:'11.5'
+    },
+    'Opera|11|60':{
+        name:'opera',
+        version:'11.6'
+    },
+    // 'Opera|12|0': No browserstack yet
     'Safari|4':{
         name:'safari',
         version:'4.0'
     },
-    'Safari|5':{
+    'Safari|5|0':{
+        name:'safari',
+        version:'5.0'
+    },
+    'Safari|5|1':{
         name:'safari',
         version:'5.1'
     }
-    // TODO: BrowserStack API doesn't support different platforms yet,
-    // their API is a little behind on the GUI.
+    // TODO: Need BrowserStack API v2 for other platforms (issue #19)
     // 'Android|1|5': {},
     // 'Android|1|6': {},
     // 'Android|2|1': {},
