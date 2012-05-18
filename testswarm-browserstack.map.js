@@ -12,6 +12,10 @@ var map = {
         name:'chrome',
         version:'18.0'
     },
+    'Chrome|19':{
+        name:'chrome',
+        version:'19.0'
+    },
     // 'Firefox|3|5': Not in browserstack anymore
     'Firefox|3|6':{
         name:'firefox',
