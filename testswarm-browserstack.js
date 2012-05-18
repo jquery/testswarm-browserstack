@@ -138,6 +138,9 @@ var TestSwarmBrowserStackInteg = {
             }
         }
 
+        console.log('TestSwarm wants these browsers:', neededBrowsers);
+        console.log('BrowserStack workers to be killed:', killWorkers);
+
         // Figure out which of the needed browsers to start.
         // Summary:
         // * If the limit is lower than the number of needed browsers, then some
@@ -150,7 +153,7 @@ var TestSwarmBrowserStackInteg = {
 
         if (self.options().verbose) {
                console.log('BrowserStack limit:', self.options().stackLimit);
-               console.log('BrowserStack # workers (-kills):', i);
+               console.log('BrowserStack # workers (minus workers to be killed):', i);
         }
 
         for (i = i < 0 ? 0 : i, len = neededBrowsers.length; i < len; i++) {
@@ -168,9 +171,6 @@ var TestSwarmBrowserStackInteg = {
                 i = -1;
             }
         }
-
-        console.log('TestSwarm wants these browsers:', neededBrowsers);
-        console.log('BrowserStack workers to be killed:', killWorkers);
         console.log('BrowserStack workers to be started:', startBrowsers);
 
         killWorkers.forEach(function (worker, i) {
