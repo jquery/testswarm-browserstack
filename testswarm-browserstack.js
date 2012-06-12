@@ -128,8 +128,10 @@ var TestSwarmBrowserStackInteg = {
                     // happen if the browser crashed. Kill the lost worker.
                     doKillWorkers = true;
                 }
-            } else if (stats.pendingRuns === 0 && workers.length && self.options().kill) {
-                // Kill workers for browsers that no longer have pending runs
+            } else if (stats.activeRuns === 0 && stats.pendingRuns === 0 && workers.length && self.options().kill) {
+                // Kill workers for browsers for which there are no new runs
+                // available and also are not actively busy running something.
+                // (we don't want to kill a worker that's working on the last run in the list)
                 doKillWorkers = true;
             }
 
