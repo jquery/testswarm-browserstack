@@ -1,22 +1,27 @@
 {
-  "author": "clarkbox",
-  "name": "testswarm-browserstack",
-  "description": "Integration layer between TestSwarm and BrowserStack",
-  "version": "0.1.0",
-  "homepage": "https://github.com/clarkbox/testswarm-browserstack",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/clarkbox/testswarm-browserstack.git"
-  },
-  "dependencies": {
-    "async": "0.1.x",
-    "browserstack": "0.0.2",
-    "commander": "0.6.x",
-    "request": "2.9.x"
-  },
-  "devDependencies": {},
-  "optionalDependencies": {},
-  "engines": {
-    "node": "*"
-  }
+    "name": "testswarm-browserstack",
+    "version": "0.1.1",
+    "description": "Integration layer between TestSwarm and BrowserStack",
+    "keywords": [
+        "testswarm",
+        "browserstack"
+    ],
+    "homepage": "https://github.com/clarkbox/testswarm-browserstack",
+    "author": "clarkbox",
+    "main": "lib/testswarm-browserstack.js",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/clarkbox/testswarm-browserstack.git"
+    },
+    "dependencies": {
+        "async": "0.1.x",
+        "browserstack": "0.0.2",
+        "commander": "0.6.x",
+        "request": "2.9.x"
+    },
+    "devDependencies": {},
+    "optionalDependencies": {},
+    "engines": {
+        "node": "*"
+    }
 }
