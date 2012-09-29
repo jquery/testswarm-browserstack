@@ -1,5 +1,9 @@
-logrotate.conf
+# Using/installing software
 node_modules
+config.json
+logrotate.conf
 run.log
 run.sh
+
+# Other files
 .DS_Store

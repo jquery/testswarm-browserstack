@@ -1,0 +1,10 @@
+{
+	"browserstack": {
+		"user": "example",
+		"pass": "*******"
+	},
+	"testswarwm": {
+		"root": "http://ci.example.org/testswarm",
+		"runUrl": "http://c.example.org/testswarm/run/JohnDoe"
+	}
+}
