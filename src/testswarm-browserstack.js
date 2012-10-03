@@ -474,7 +474,7 @@ self = {
 				console.log('No workers running or queued');
 			}
 			workers.forEach(function (worker) {
-				self.terminateWorker(worker);
+				self.terminateWorker(worker.id);
 			});
 		});
 	},
