@@ -5,12 +5,20 @@ This script is currently compatible with:
 * [TestSwarm](https://github.com/jquery/testswarm) 1.0.0-alpha or higher
 * [BrowserStack API](https://github.com/browserstack/api) v1
 
+## Install
+--------------------------------------
+```bash
+git clone https://github.com/clarkbox/testswarm-browserstack.git testswarm-browserstack
+cd testswarm-browserstack/
+npm install
+```
+
 
 ## How to use CLI:
 --------------------------------------
-<pre>
+```bash
 node src/cli.js --run
-</pre>
+```
 
 This above command will create and terminate BrowserStack workers as needed according to the information the TestSwarm `swarmstate` API provides. This command should be executed on a regular interval, either via a scheduler (such as crontab) or by letting node do a continuous loop (using the `--run-loop` option). Be sure to do start it from a scheduler still in a way that it will only start it if it isn't running anymore (in case of an exception).
 
@@ -20,8 +28,8 @@ If you plan to run it from a scheduler and keep log files, you're recommended to
 ## Main scripts:
 --------------------------------------
 
-1. [testswarm-browserstack.js](https://github.com/Krinkle/testswarm-browserstack/blob/master/src/testswarm-browserstack.js) - Abstraction of TestSwarm API, and Scott González's BrowserStack API. Use it to automatically spawn BrowserStack workers based on your swarm's needs.
-1. [cli.js](https://github.com/Krinkle/testswarm-browserstack/blob/master/src/cli.js) - nodejs cli wrapper around it all. Allows for scripted or generally easy manual invocation of the script.
+1. [testswarm-browserstack.js](https://github.com/clarkbox/testswarm-browserstack/blob/master/src/testswarm-browserstack.js) - Abstraction of TestSwarm API, and Scott González's BrowserStack API. Use it to automatically spawn BrowserStack workers based on your swarm's needs.
+1. [cli.js](https://github.com/clarkbox/testswarm-browserstack/blob/master/src/cli.js) - nodejs cli wrapper around it all. Allows for scripted or generally easy manual invocation of the script.
 
 
 ## testswarm-browserstack.js

@@ -341,7 +341,7 @@ self = {
 		}
 
 		// Task 2: Start workers for browsers with pending tests but 0 online clients
-		// and 0 workers (this last bit is important as we don't want to spawncr another
+		// and 0 workers (this last bit is important as we don't want to spawn another
 		// worker here if there is one queued but not in the swarm yet).
 		// Note: This is the only case where we ignore the total limit to use the 'queue'
 		// system of browserstack to start all browsers that are needed without question.
@@ -388,18 +388,16 @@ self = {
 			for (ua in percSwarmStats) {
 				stats = percSwarmStats[ua];
 				if (workersByUa[ua] >= config.browserstack.eqLimit) {
-					// We've reached the number of max for this ua.
-					priority = 0;
-				} else if (stats.onlineClients === 0) {
-					// We already dealt with this category. If it is still 0,
-					// it means we can't help this one (see Task 1).
-					// Also, x/0 is NaN or Infinity in javascript, which we don't want.
+					// We've reached the max for this ua.
 					priority = 0;
 				} else {
 					// This is the priority formula.
-					// The more runs and the less clients, the higher the priority.
-					// No runs? Priority becomes 0 (0/anything=0).
-					priority = stats.pendingRuns / stats.onlineClients;
+					// Principle: The more pending runs and the less online clients, the higher the priority.
+					// No pending runs? Priority becomes 0 (0 / anything = 0).
+					// Note: Don't filter for where onlineClients is 0 (though task 2 already covers those,
+					// and `anything / 0 = NaN`, it only does one, we have eqLimit still).
+					// Fixed by doing +1 on onlineClients (see also clarkbox/testswarm-browserstack#31).
+					priority = stats.pendingRuns / ( stats.onlineClients + 1);
 				}
 				if (priority > neediest.priority) {
 					neediest = {
