@@ -132,7 +132,7 @@ self = {
 			workerToUaId = util.generateReverseMap(browserMap);
 		}
 
-		key = JSON.stringify(worker.browser);
+		key = util.getHash(worker.browser);
 
 		return workerToUaId[key];
 	},
