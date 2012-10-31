@@ -115,6 +115,7 @@ if (program.run || program.runLoop) {
 	if (!confContains(config.testswarm, ['root', 'runUrl'], 'testswarm.')) {
 		process.exit(1);
 	}
+	console.log(new Date());
 	if (program.runLoop) {
 		runLoop();
 	} else {
