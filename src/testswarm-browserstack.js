@@ -255,10 +255,10 @@ self = {
 		liveWorkers.forEach(function (worker) {
 			percWorkers[worker.id] = {
 				status: worker.status,
-				browser: worker.browser
+				browser: _.pick(worker, 'os', 'version', 'browser')
 			};
 
-			uaId = self.getUaIdFromWorker(worker);
+			uaId = self.getUaIdFromWorker(percWorkers[worker.id]);
 			if (uaId) {
 				workersByUa[uaId] += 1;
 			}
