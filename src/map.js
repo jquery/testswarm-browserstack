@@ -261,8 +261,8 @@ var map = {
 		os: 'ios'
 	}
 
- 	// TODO: Most of the following ua's are supported by BrowserStack.
- 	// However we need support for it via the API
+	// TODO: Most of the following ua's are supported by BrowserStack.
+	// However we need support for it via the API
 
 	// 'Fennec|4': {},
 	// 'Opera Mobile': {},

@@ -142,7 +142,7 @@ self = {
                 action: 'spawn',
                 browser: browser,
                 dryrun: true,
-                color:'cyan'
+                color: 'cyan'
             });
 			return;
 		}
@@ -154,13 +154,14 @@ self = {
 
 		client.createWorker(browserSettings, function (err, worker) {
 			if (err) {
-				this.error('action=spawnworker error='+ ' browser= '+JSON.stringify(browser) , browser, err);
+				this.error('action=spawnworker error=' + ' browser= ' + JSON.stringify(browser), browser, err);
 				return;
 			}
             util.log({
                 action: 'spawn',
                 browser: browser,
-                color:'green'
+                worker: worker,
+                color: 'green'
             });
 		});
 	},
@@ -186,7 +187,7 @@ self = {
                 action: 'terminate',
                 worker: worker,
                 dryrun: true,
-                color:'cyan'
+                color: 'cyan'
             });
 			return;
 		}
@@ -199,7 +200,7 @@ self = {
             util.log({
                 action: 'terminate',
                 worker: worker,
-                color:'yello'
+                color: 'yello'
             });
 		});
 	},
@@ -276,7 +277,7 @@ self = {
 			}
 		});
 
-		if(config.verbose){
+		if (config.verbose) {
             util.log('Summary:', (function () {
                 var ua, summary = {};
                 for (ua in workersByUa) {
@@ -289,7 +290,7 @@ self = {
         }
 
         util.log({
-            action:'liveWorkers',
+            action: 'liveWorkers',
             liveWorkers: percWorkers
         });
 		if (config.verbose) {
@@ -416,7 +417,7 @@ self = {
 					// Note: Don't filter for where onlineClients is 0 (though task 2 already covers those,
 					// and `anything / 0 = NaN`, it only does one, we have eqLimit still).
 					// Fixed by doing +1 on onlineClients (see also clarkbox/testswarm-browserstack#31).
-					priority = stats.pendingRuns / ( stats.onlineClients + 1);
+					priority = stats.pendingRuns / (stats.onlineClients + 1);
 				}
 				if (priority > neediest.priority) {
 					neediest = {
@@ -440,7 +441,7 @@ self = {
                 util.log({
                     action: 'notice',
                     message: 'Neediness exhausted, done!'
-                })
+                });
 				break;
 			} else {
 				if (config.verbose) {
