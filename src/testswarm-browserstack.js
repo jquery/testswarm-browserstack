@@ -2,10 +2,8 @@ var async = require('async'),
 	browserstack = require('browserstack'),
 	request = require('request'),
 	_ = require('underscore'),
-
 	browserMap = require('./map'),
 	util = require('./util'),
-
 	config = {
 		browserstack: {
 			user: undefined,
@@ -32,9 +30,6 @@ var async = require('async'),
 	self,
 	bsClient,
 	workerToUaId;
-
-require('colors');
-
 
 /**
  * Terminology:
@@ -137,14 +132,18 @@ self = {
 
 		return workerToUaId[key];
 	},
-
 	/**
 	 * Spawn a new BrowserStack worker.
 	 * @param {Object} browser
 	 */
 	spawnWorker: function (browser) {
 		if (config.browserstack.dryRun) {
-			console.log('[spawnWorker] Dry run:'.cyan, browser);
+            util.log({
+                action: 'spawn',
+                browser: browser,
+                dryrun: true,
+                color:'cyan'
+            });
 			return;
 		}
 		var client = self.getBsClient(),
@@ -155,10 +154,14 @@ self = {
 
 		client.createWorker(browserSettings, function (err, worker) {
 			if (err) {
-				console.error('[spawnWorker] Error:'.red + ' Browser', browser, err);
+				this.error('action=spawnworker error='+ ' browser= '+JSON.stringify(browser) , browser, err);
 				return;
 			}
-			console.log('[spawnWorker]'.green, browser, worker);
+            util.log({
+                action: 'spawn',
+                browser: browser,
+                color:'green'
+            });
 		});
 	},
 
@@ -170,7 +173,7 @@ self = {
 		if (browserMap[ua]) {
 			self.spawnWorker(browserMap[ua]);
 		} else {
-			console.error('[spawnWorkerByUa] Error:'.red + ' Unknown uaId: ' + ua);
+			this.error('[spawnWorkerByUa] Error:'.red + ' Unknown uaId: ' + ua);
 		}
 	},
 
@@ -179,7 +182,12 @@ self = {
 	 */
 	terminateWorker: function (worker) {
 		if (config.browserstack.dryRun) {
-			console.log('[terminateWorker] Dry run:'.cyan + ' Terminate #' + worker);
+            util.log({
+                action: 'terminate',
+                worker: worker,
+                dryrun: true,
+                color:'cyan'
+            });
 			return;
 		}
 		var client = self.getBsClient();
@@ -188,7 +196,11 @@ self = {
 				console.error('[terminateWorker] Error:'.red + ' Worker #' + worker + '\n', err);
 				return;
 			}
-			console.log('[terminateWorker]'.yellow + ' Terminated worker #' + worker);
+            util.log({
+                action: 'terminate',
+                worker: worker,
+                color:'yello'
+            });
 		});
 	},
 
@@ -264,20 +276,26 @@ self = {
 			}
 		});
 
-		console.log('Summary:', (function () {
-			var ua, summary = {};
-			for (ua in workersByUa) {
-				if (workersByUa[ua]) {
-					summary[ua] = workersByUa[ua];
-				}
-			}
-			return summary;
-		}()));
-		console.log('Live workers:\n', percWorkers);
-		if (config.verbose) {
-			console.log('Live swarm state:\n', percSwarmStats, '\n');
+		if(config.verbose){
+            util.log('Summary:', (function () {
+                var ua, summary = {};
+                for (ua in workersByUa) {
+                    if (workersByUa[ua]) {
+                        summary[ua] = workersByUa[ua];
+                    }
+                }
+                return summary;
+            }()));
+        }
 
-			console.log('\n== Task 1 ==\n'.white.bold);
+        util.log({
+            action:'liveWorkers',
+            liveWorkers: percWorkers
+        });
+		if (config.verbose) {
+			util.log('Live swarm state:\n', percSwarmStats, '\n');
+
+			util.log('\n== Task 1 ==\n'.white.bold);
 		}
 
 		// Task 1: Terminate no longer needed workers
@@ -296,7 +314,7 @@ self = {
 				if (config.verbose) {
 					// This worker was either created by a different script or by a another version
 					// of this script with different ua map.
-					console.log('Found worker for which there is no match in UA map', worker);
+					util.log('Found worker for which there is no match in UA map', worker);
 				}
 				continue;
 			}
@@ -305,7 +323,7 @@ self = {
 
 			if (stats.pendingRuns === 0 && stats.activeRuns === 0) {
 				if (config.verbose) {
-					console.log('No longer needed worker:', {
+					util.log('No longer needed worker:', {
 						worker: worker,
 						stats: stats
 					});
@@ -326,7 +344,7 @@ self = {
 			// with event-based testswarm we'll be able to more closely determine this.
 			} else if (worker.status === 'running' && stats.onlineClients === 0) {
 				if (config.verbose) {
-					console.log('Running worker disconnected from the swarm:', {
+					util.log('Running worker disconnected from the swarm:', {
 						worker: worker,
 						stats: stats
 					});
@@ -350,7 +368,7 @@ self = {
 		// each online so that they can work asynchronous. And then, in Task 2, we'll
 		// fill in extra workers if possible.
 		if (config.verbose) {
-			console.log('\n== Task 2 ==\n'.white.bold);
+			util.log('\n== Task 2 ==\n'.white.bold);
 		}
 
 		for (ua in percSwarmStats) {
@@ -367,7 +385,7 @@ self = {
 		// Task 3: Compute the neediness of browsers and spawncr the most
 		// needed browser. Keep doing so until the available slots are filled.
 		if (config.verbose) {
-			console.log('\n== Task 3 ==\n'.white.bold);
+			util.log('\n== Task 3 ==\n'.white.bold);
 		}
 
 		function workerTotal() {
@@ -411,16 +429,22 @@ self = {
 			return neediest;
 		}
 
-
-		console.log('Status... (workers: ' + workerTotal() + ' / limit: ' + config.browserstack.totalLimit + ')');
+        util.log({
+            action: 'stats',
+            workers: workerTotal(),
+            limit: config.browserstack.totalLimit
+        });
 		while (workerTotal() < config.browserstack.totalLimit) {
 			result = getNeediest();
 			if (result.priority <= 0) {
-				console.log('Neediness exhausted, done!');
+                util.log({
+                    action: 'notice',
+                    message: 'Neediness exhausted, done!'
+                })
 				break;
 			} else {
 				if (config.verbose) {
-					console.log('Most needed:', result);
+					util.log('Most needed:', result);
 				}
 				self.spawnWorker(browserMap[result.ua]);
 
@@ -428,7 +452,11 @@ self = {
 				percSwarmStats[result.ua].onlineClients += 1;
 				workersByUa[result.ua] += 1;
 			}
-			console.log('Looping... (workers: ' + workerTotal() + ' / limit: ' + config.browserstack.totalLimit + ')');
+            util.log({
+                action: 'looping',
+                workers: workerTotal(),
+                limit: config.browserstack.totalLimit
+            });
 		}
 
 	},
@@ -470,7 +498,7 @@ self = {
 				return;
 			}
 			if (!workers || workers.length < 1) {
-				console.log('No workers running or queued');
+				util.log('No workers running or queued');
 			}
 			workers.forEach(function (worker) {
 				self.terminateWorker(worker.id);
@@ -486,12 +514,11 @@ self = {
 				return;
 			}
 			if (!worker) {
-				console.log('No worker info available');
+				util.log('No worker info available');
 			}
-			console.log('Worker #' + id + ':\n', worker);
+			util.log('Worker #' + id + ':\n', worker);
 		});
 	}
 };
-
 
 module.exports = self;

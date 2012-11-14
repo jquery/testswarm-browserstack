@@ -36,9 +36,7 @@ function runLoop() {
 		program.dryRun ? '--dry-run' : ''
 	]);
 	child.stdout.on('data', function (data) {
-		console.log(
-			'\t' + String(data).replace(/\n/g, '\n\t')
-		);
+		console.log(String(data));
 	});
 	child.stderr.on('data', function (data) {
 		console.error(
@@ -46,7 +44,9 @@ function runLoop() {
 		);
 	});
 	child.on('exit', function () {
-		console.log('Next iteration in ' + program.runLoop + ' seconds...');
+        if (config.verbose) {
+		    console.log('Next iteration in ' + program.runLoop + ' seconds...');
+        }
 		setTimeout(runLoop, program.runLoop * 1000);
 	});
 }
@@ -115,7 +115,7 @@ if (program.run || program.runLoop) {
 	if (!confContains(config.testswarm, ['root', 'runUrl'], 'testswarm.')) {
 		process.exit(1);
 	}
-	console.log(new Date());
+
 	if (program.runLoop) {
 		runLoop();
 	} else {

@@ -1,3 +1,5 @@
+var _ = require('underscore'),
+    colors = require('colors');
 /**
  * Like typeof === 'object' but more accurate.
  * (null is not an object, arrays and functions are objects).
@@ -90,9 +92,37 @@ function generateReverseMap(map) {
 	return rev;
 }
 
+function log(data){
+    var l = (new Date()) + ' : ';
+    if(typeof data === 'string' || typeof data === 'number'){
+        data = {
+            message: data
+        }
+    }
+
+    if(!data.action){
+        data.action = 'unspecified'
+    }
+
+    for(i in data){
+        var literal = data[i];
+        if(_.isObject(literal)){
+            literal = JSON.stringify(literal);
+        }
+        l+= i+'='+ literal +' ';
+    }
+
+    if(data.color){
+        l[data.color];
+    }
+
+    console.log(l);
+}
+
 module.exports = {
 	extendObject: extendObject,
 	copy: copy,
 	getHash: getHash,
-	generateReverseMap: generateReverseMap
+	generateReverseMap: generateReverseMap,
+    log: log
 };
