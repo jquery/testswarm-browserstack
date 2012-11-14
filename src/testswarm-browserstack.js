@@ -1,6 +1,7 @@
 var async = require('async'),
 	browserstack = require('browserstack'),
 	request = require('request'),
+	_ = require('underscore'),
 
 	browserMap = require('./map'),
 	util = require('./util'),
@@ -82,7 +83,7 @@ self = {
 		// Lazy init
 		if (!bsClient) {
 			bsClient = browserstack.createClient({
-				version: 1,
+				version: 2,
 				username: config.browserstack.user,
 				password: config.browserstack.pass
 			});
@@ -146,13 +147,13 @@ self = {
 			console.log('[spawnWorker] Dry run:'.cyan, browser);
 			return;
 		}
-		var client = self.getBsClient();
-		client.createWorker({
-			browser: browser.name,
-			version: browser.version,
-			url: config.testswarm.runUrl,
-			timeout: config.browserstack.workerTimeout
-		}, function (err, worker) {
+		var client = self.getBsClient(),
+			browserSettings = _.extend({
+				url: config.testswarm.runUrl,
+				timeout: config.browserstack.workerTimeout
+			}, browser);
+
+		client.createWorker(browserSettings, function (err, worker) {
 			if (err) {
 				console.error('[spawnWorker] Error:'.red + ' Browser', browser, err);
 				return;
@@ -254,10 +255,10 @@ self = {
 		liveWorkers.forEach(function (worker) {
 			percWorkers[worker.id] = {
 				status: worker.status,
-				browser: worker.browser
+				browser: _.pick(worker, 'os', 'version', 'browser')
 			};
 
-			uaId = self.getUaIdFromWorker(worker);
+			uaId = self.getUaIdFromWorker(percWorkers[worker.id]);
 			if (uaId) {
 				workersByUa[uaId] += 1;
 			}

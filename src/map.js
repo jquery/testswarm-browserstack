@@ -9,162 +9,262 @@
  */
 var map = {
 	'Chrome|17': {
-		name: 'chrome',
-		version: '17.0'
+		browser: 'chrome',
+		version: '17.0',
+		os: 'win'
 	},
 	'Chrome|18': {
-		name: 'chrome',
-		version: '18.0'
+		browser: 'chrome',
+		version: '18.0',
+		os: 'win'
 	},
 	'Chrome|19': {
-		name: 'chrome',
-		version: '19.0'
+		browser: 'chrome',
+		version: '19.0',
+		os: 'win'
 	},
 	'Chrome|20': {
-		name: 'chrome',
-		version: '20.0'
+		browser: 'chrome',
+		version: '20.0',
+		os: 'win'
 	},
 	'Chrome|21': {
-		name: 'chrome',
-		version: '21.0'
+		browser: 'chrome',
+		version: '21.0',
+		os: 'win'
 	},
 	'Chrome|22': {
-		name: 'chrome',
-		version: '22.0'
+		browser: 'chrome',
+		version: '22.0',
+		os: 'win'
 	},
 	'Chrome|23': {
-		name: 'chrome',
-		version: '23.0'
+		browser: 'chrome',
+		version: '23.0',
+		os: 'win'
 	},
 	'Firefox|3|0': {
-		name: 'firefox',
-		version: '3.0'
+		browser: 'firefox',
+		version: '3.0',
+		os: 'win'
 	},
 	// 'Firefox|3|5': Not in browserstack anymore
 	'Firefox|3|6': {
-		name: 'firefox',
-		version: '3.6'
+		browser: 'firefox',
+		version: '3.6',
+		os: 'win'
 	},
 	'Firefox|4': {
-		name: 'firefox',
-		version: '4.0'
+		browser: 'firefox',
+		version: '4.0',
+		os: 'win'
 	},
 	'Firefox|5': {
-		name: 'firefox',
-		version: '5.0'
+		browser: 'firefox',
+		version: '5.0',
+		os: 'win'
 	},
 	'Firefox|6': {
-		name: 'firefox',
-		version: '6.0'
+		browser: 'firefox',
+		version: '6.0',
+		os: 'win'
 	},
 	'Firefox|7': {
-		name: 'firefox',
-		version: '7.0'
+		browser: 'firefox',
+		version: '7.0',
+		os: 'win'
 	},
 	'Firefox|8': {
-		name: 'firefox',
-		version: '8.0'
+		browser: 'firefox',
+		version: '8.0',
+		os: 'win'
 	},
 	'Firefox|9': {
-		name: 'firefox',
-		version: '9.0'
+		browser: 'firefox',
+		version: '9.0',
+		os: 'win'
 	},
 	'Firefox|10': {
-		name: 'firefox',
-		version: '10.0'
+		browser: 'firefox',
+		version: '10.0',
+		os: 'win'
 	},
 	'Firefox|11': {
-		name: 'firefox',
-		version: '11.0'
+		browser: 'firefox',
+		version: '11.0',
+		os: 'win'
 	},
 	'Firefox|12': {
-		name: 'firefox',
-		version: '12.0'
+		browser: 'firefox',
+		version: '12.0',
+		os: 'win'
 	},
 	'Firefox|13': {
-		name: 'firefox',
-		version: '13.0'
+		browser: 'firefox',
+		version: '13.0',
+		os: 'win'
 	},
 	'Firefox|14': {
-		name: 'firefox',
-		version: '14.0'
+		browser: 'firefox',
+		version: '14.0',
+		os: 'win'
 	},
 	'Firefox|15': {
-		name: 'firefox',
-		version: '15.0'
+		browser: 'firefox',
+		version: '15.0',
+		os: 'win'
 	},
 	'Firefox|16': {
-		name: 'firefox',
-		version: '16.0'
+		browser: 'firefox',
+		version: '16.0',
+		os: 'win'
 	},
 	'IE|6': {
-		name: 'ie',
-		version: '6.0'
+		browser: 'ie',
+		version: '6.0',
+		os: 'win'
 	},
 	'IE|7': {
-		name: 'ie',
-		version: '7.0'
+		browser: 'ie',
+		version: '7.0',
+		os: 'win'
 	},
 	'IE|8': {
-		name: 'ie',
-		version: '8.0'
+		browser: 'ie',
+		version: '8.0',
+		os: 'win'
 	},
 	'IE|9': {
-		name: 'ie',
-		version: '9.0'
+		browser: 'ie',
+		version: '9.0',
+		os: 'win'
 	},
 	'IE|10': {
-		name: 'ie',
-		version: '10.0'
+		browser: 'ie',
+		version: '10.0',
+		os: 'win'
 	},
 	'Opera|11|10': {
-		name: 'opera',
-		version: '11.1'
+		browser: 'opera',
+		version: '11.1',
+		os: 'win'
 	},
 	'Opera|11|50': {
-		name: 'opera',
-		version: '11.5'
+		browser: 'opera',
+		version: '11.5',
+		os: 'win'
 	},
 	'Opera|11|60': {
-		name: 'opera',
-		version: '11.6'
+		browser: 'opera',
+		version: '11.6',
+		os: 'win'
 	},
 	'Opera|12|0': {
-		name: 'opera',
-		version: '12.0'
+		browser: 'opera',
+		version: '12.0',
+		os: 'win'
 	},
-	// 'Opera|12|5': Not yet supported by browscap
+	'Opera|12|5': {
+		browser: 'opera',
+		version: '12.5',
+		os: 'win'
+	},
 	'Safari|4': {
-		name: 'safari',
-		version: '4.0'
+		browser: 'safari',
+		version: '4.0',
+		os: 'mac'
 	},
 	'Safari|5|0': {
-		name: 'safari',
-		version: '5.0'
+		browser: 'safari',
+		version: '5.0',
+		os: 'mac'
 	},
 	'Safari|5|1': {
-		name: 'safari',
-		version: '5.1'
+		browser: 'safari',
+		version: '5.1',
+		os: 'mac'
+	},
+	'Safari|6|0': {
+		browser: 'safari',
+		version: '6.0',
+		os: 'mac'
+	},
+	'Android|1|5': {
+		device: 'HTC Hero',
+		version: '1.5',
+		os: 'android'
+	},
+	'Android|1|6': {
+		device: 'Sony Xperia X10',
+		version: '1.6',
+		os: 'android'
+	},
+	'Android|2|1': {
+		device: 'Samsung Galaxy S',
+		version: '2.1',
+		os: 'android'
+	},
+	'Android|2|2': {
+		device: 'HTC Wildfire',
+		version: '2.2',
+		os: 'android'
+	},
+	'Android|2|3': {
+		device: 'Samsung Galaxy S II',
+		version: '2.3',
+		os: 'android'
+	},
+
+	'iPhone|3|0': {
+		device: 'iPhone 3GS',
+		version: '3.0',
+		os: 'ios'
+	},
+	'iPhone|4|0': {
+		device: 'iPhone 4',
+		version: '4.0',
+		os: 'ios'
+	},
+	'iPhone|5|1': {
+		device: 'iPhone 4S',
+		version: '5.1',
+		os: 'ios'
+	},
+	'iPhone|6|0': {
+		device: 'iPhone 5',
+		version: '6.0',
+		os: 'ios'
+	},
+	'iPad|3|2': {
+		device: 'iPad',
+		version: '3.2',
+		os: 'ios'
+	},
+	'iPad|4|3': {
+		device: 'iPad 2',
+		version: '4.3.2',
+		os: 'ios'
+	},
+	'iPad|5|0': {
+		device: 'iPad 2 (5.0)',
+		version: '5.0',
+		os: 'ios'
+	},
+	'iPad|5|1': {
+		device: 'iPad 3rd',
+		version: '5.1',
+		os: 'ios'
+	},
+	'iPad|6|0': {
+		device: 'iPad 3rd (6.0)',
+		version: '6.0',
+		os: 'ios'
 	}
 
-	// 'Safari|6|0': Safari 6 is Mac-only, and the BrowserStack v1 API is Windows-only
+ 	// TODO: Most of the following ua's are supported by BrowserStack.
+ 	// However we need support for it via the API
 
-	// TODO: Most of the following ua's are supported by BrowserStack.
-	// However we need to switch to BrowserStack API v2 in order for those to
-	// work. the v1 API is desktop-only for compatibility reasons (issue #19)
-
-	// 'Android|1|5': {},
-	// 'Android|1|6': {},
-	// 'Android|2|1': {},
-	// 'Android|2|2': {},
-	// 'Android|2|3': {},
 	// 'Fennec|4': {},
-	// 'iPhone|3|2': {},
-	// 'iPhone|4|3': {},
-	// 'iPhone|5': {},
-	// 'iPad|3|2': {},
-	// 'iPad|4|3': {},
-	// 'iPad|5': {},
 	// 'Opera Mobile': {},
 	// 'Opera Mini|2': {},
 	// 'Palm Web|1': {},
