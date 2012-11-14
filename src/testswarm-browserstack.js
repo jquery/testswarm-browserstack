@@ -31,6 +31,8 @@ var async = require('async'),
 	bsClient,
 	workerToUaId;
 
+require('colors');
+
 /**
  * Terminology:
  *
@@ -141,8 +143,7 @@ self = {
             util.log({
                 action: 'spawn',
                 browser: browser,
-                dryrun: true,
-                color: 'cyan'
+                dryrun: true
             });
 			return;
 		}
@@ -160,8 +161,7 @@ self = {
             util.log({
                 action: 'spawn',
                 browser: browser,
-                worker: worker,
-                color: 'green'
+                worker: worker
             });
 		});
 	},
@@ -186,8 +186,7 @@ self = {
             util.log({
                 action: 'terminate',
                 worker: worker,
-                dryrun: true,
-                color: 'cyan'
+                dryrun: true
             });
 			return;
 		}
@@ -199,8 +198,7 @@ self = {
 			}
             util.log({
                 action: 'terminate',
-                worker: worker,
-                color: 'yello'
+                worker: worker
             });
 		});
 	},
@@ -251,7 +249,7 @@ self = {
 		// Task 0: Initialize perception.
 		// Also, simplify our data and make it easier to access.
 		if (config.verbose) {
-			console.log('\n== Task 0 ==\n'.white.bold);
+			util.log('\n== Task 0 ==\n'.white.bold);
 		}
 
 		percSwarmStats = {};

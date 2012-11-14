@@ -1,4 +1,4 @@
-var _ = require('underscore');
+var logColors;
 require('colors');
 
 /**
@@ -93,14 +93,22 @@ function generateReverseMap(map) {
 	return rev;
 }
 
+logColors = {
+	dryRyn: 'cyan',
+	spawn: 'green',
+	terminate: 'yellow'
+};
 function log(data) {
-	var key, msg, literal;
+	var key, msg, value;
 
-	msg = new Date() + ' : ';
-	if (typeof data === 'string' || typeof data === 'number') {
-		data = {
-			message: data
-		};
+	msg = new Date() + ': ';
+
+	// Plain log
+	if (!isObject(data) || arguments.length > 1) {
+		value = [].slice.call(arguments);
+		value.unshift(msg);
+		console.log.apply(console, value);
+		return;
 	}
 
 	if (!data.action) {
@@ -108,15 +116,17 @@ function log(data) {
 	}
 
 	for (key in data) {
-		literal = data[key];
-		if (_.isObject(literal)) {
-			literal = JSON.stringify(literal);
+		value = data[key];
+		if (isObject(value)) {
+			value = JSON.stringify(value);
 		}
-		msg += key + '=' + literal + ' ';
+		msg += key + '=' + value + ' ';
 	}
 
-	if (data.color) {
-		msg = msg[data.color];
+	if (data.dryRyn) {
+		msg = msg[data.logColors.dryRyn];
+	} else if (logColors[data.action]) {
+		msg = msg[logColors[data.action]];
 	}
 
 	console.log(msg);
