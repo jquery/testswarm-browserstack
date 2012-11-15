@@ -2,7 +2,7 @@ var async = require('async'),
 	browserstack = require('browserstack'),
 	request = require('request'),
 	_ = require('underscore'),
-	browserMap = require('./map'),
+	mapHelper = require('./mapHelper'),
 	util = require('./util'),
 	config = {
 		browserstack: {
@@ -29,7 +29,7 @@ var async = require('async'),
 	},
 	self,
 	bsClient,
-	workerToUaId;
+	mapCache;
 
 require('colors');
 
@@ -54,15 +54,6 @@ require('colors');
  */
 
 self = {
-	/**
-	 * Set configuration variables
-	 * @param {Object} options Overrides keys in config with given values.
-	 */
-	extendConfig: function (options) {
-		if (options) {
-			util.extendObject(config, options, /* deep = */ true);
-		}
-	},
 
 	/**
 	 * Get configuration object (by reference)
@@ -72,51 +63,252 @@ self = {
 		return config;
 	},
 
-	/**
-	 * Create/get the singleton Client instance for BrowserStack.
-	 * return {Client}
-	 */
-	getBsClient: function () {
-		// Lazy init
-		if (!bsClient) {
-			bsClient = browserstack.createClient({
-				version: 2,
-				username: config.browserstack.user,
-				password: config.browserstack.pass
+	browserstack: {
+
+		/**
+		 * Create/get the singleton Client instance for BrowserStack.
+		 * return {Client}
+		 */
+		getClient: function () {
+			// Lazy init
+			if (!bsClient) {
+				bsClient = browserstack.createClient({
+					version: 2,
+					username: config.browserstack.user,
+					password: config.browserstack.pass
+				});
+			}
+			return bsClient;
+		},
+
+		getWorker: function (id) {
+			var client = self.browserstack.getClient();
+			client.getWorker(id, function (err, worker) {
+				if (err) {
+					console.error('Could not get worker info from browserstack');
+					return;
+				}
+				if (!worker) {
+					util.log('No worker info available');
+				}
+				util.log('Worker #' + id + ':\n', worker);
+			});
+		},
+
+		/**
+		 * @param {number} worker The worker id.
+		 */
+		terminateWorker: function (worker) {
+			if (config.browserstack.dryRun) {
+				util.log({
+					action: 'terminate',
+					worker: worker,
+					dryRun: true
+				});
+				return;
+			}
+			var client = self.browserstack.getClient();
+			client.terminateWorker(worker, function (err) {
+				if (err) {
+					console.error('[terminateWorker] Error:'.red + ' Worker #' + worker + '\n', err);
+					return;
+				}
+				util.log({
+					action: 'terminate',
+					worker: worker
+				});
+			});
+		},
+
+		terminateAll: function () {
+			var client = self.browserstack.getClient();
+			client.getWorkers(function (err, workers) {
+				if (err) {
+					console.error('Could not get workers from browserstack');
+					return;
+				}
+				if (!workers || workers.length < 1) {
+					util.log('No workers running or queued');
+				}
+				workers.forEach(function (worker) {
+					self.browserstack.terminateWorker(worker.id);
+				});
+			});
+		},
+
+		/**
+		 * Spawn a new BrowserStack worker.
+		 * @param {Object} browser
+		 */
+		spawnWorker: function (browser) {
+			if (config.browserstack.dryRun) {
+				util.log({
+					action: 'spawn',
+					browser: browser,
+					dryRun: true
+				});
+				return;
+			}
+			var client = self.browserstack.getClient(),
+				browserSettings = _.extend({
+					url: config.testswarm.runUrl,
+					timeout: config.browserstack.workerTimeout
+				}, browser);
+
+			client.createWorker(browserSettings, function (err, worker) {
+				if (err) {
+					this.error('action=spawnworker error=' + ' browser= ' + JSON.stringify(browser), browser, err);
+					return;
+				}
+				util.log({
+					action: 'spawn',
+					browser: browser,
+					worker: worker
+				});
 			});
 		}
-		return bsClient;
+	},
+
+	testswarm: {
+		/**
+		 * Get the swarmstate of testswarm (number of active clients and pending runs).
+		 * @param {Function} callback
+		 */
+		getState: function (callback) {
+			request.get(config.testswarm.root + '/api.php?action=swarmstate', function (err, res, body) {
+				var apiData;
+				if (err) {
+					callback({
+						code: 'node-request',
+						info: err
+					});
+					return;
+				}
+				apiData = JSON.parse(body);
+				if (apiData) {
+					if (apiData.error) {
+						callback(apiData.error);
+						return;
+					}
+					if (apiData.swarmstate) {
+						callback(null, apiData.swarmstate);
+						return;
+					}
+				}
+				callback({
+					code: 'testswarm-response',
+					info: 'Invalid API response'
+				});
+			});
+		}
 	},
 
 	/**
-	 * Get the swarmstate of testswarm (number of active clients and pending runs).
-	 * @param {Function} callback
+	 * Get map of TestSwarm uaData to BrowserStack worker templates
+	 * and vice versa.
+	 * @param {Function} callback(err, map): map is always defined and
+	 * at least contains a template, so errors can be ignored.
 	 */
-	getSwarmState: function (callback) {
-		request.get(config.testswarm.root + '/api.php?action=swarmstate', function (err, res, body) {
-			var apiData;
+	getMap: function (callback) {
+		var map = {
+			uaID2Browser: {},
+			browser2UaID: {}
+		};
+		async.parallel({
+			swarmstate: self.testswarm.getState,
+			browsers: function (callback) {
+				self.browserstack.getClient().getBrowsers(callback);
+			}
+		}, function (err, results) {
+			var userAgents,
+				foundPrecision, found, uaID, uaData,
+				key;
+
 			if (err) {
-				callback({
-					code: 'node-request',
-					info: err
-				});
+				callback(err, map);
+				return;
 			}
-			apiData = JSON.parse(body);
-			if (apiData) {
-				if (apiData.error) {
-					callback(apiData.error);
-					return;
+
+			// browser data: 100 pt
+			// os data: 10 pt
+			// device data: 1pt
+			// asumption: data has no more than 9 keys
+			function find(browser) {
+				var
+					precision = 0,
+					browserFamily = mapHelper.values[browser.browser] || browser.browser,
+					browserVersion = browser.version,
+					osFamily = mapHelper.values[browser.os] || browser.os,
+					deviceFamily = mapHelper.values[browser.device] || browser.device;
+
+				if (browserFamily === uaData.browserFamily.toLowerCase()) {
+					precision += 100;
+					if (!deviceFamily) {
+						if (browserVersion.indexOf(uaData.browserMajor) === 0) {
+							precision += 100;
+						}
+						if (browserVersion.indexOf(uaData.browserMajor + '.' + uaData.browserMinor) === 0) {
+							precision += 100;
+						}
+						if (browserVersion.indexOf(uaData.browserMajor + '.' + uaData.browserMinor + uaData.browserPatch) === 0) {
+							precision += 100;
+						}
+					}
 				}
-				if (apiData.swarmstate) {
-					callback(null, apiData.swarmstate);
-					return;
+				if (osFamily === uaData.osFamily) {
+					precision += 10;
+					// BrowserStack API v2 has no versioning for OS, except for special devices.
+					// And in that case it puts the os version in the browser version property...
+					if (deviceFamily) {
+						if (browserVersion.indexOf(uaData.osMajor) === 0) {
+							precision += 10;
+						}
+						if (browserVersion.indexOf(uaData.osMajor + '.' + uaData.osMinor) === 0) {
+							precision += 10;
+						}
+						if (browserVersion.indexOf(uaData.osMajor + '.' + uaData.osMinor + uaData.osPatch) === 0) {
+							precision += 10;
+						}
+					}
+				}
+				if (deviceFamily === uaData.deviceFamily) {
+					precision += 1;
+				}
+				if (precision > foundPrecision) {
+					found = browser;
+					foundPrecision = precision;
+					// The map from browser to uaID needs to be done from here instead
+					// of afterwards,  because there can be more than 1 browser template
+					// that correspond to the same uaID. Although we only need 1 within this run,
+					// it can be a different one next run (pretty much random if two are equally
+					// precise, which ever is returned first in the api). To avoid us from
+					// not recognizing workers for uaID from earlier runs, keep track of all
+					// possible browser templates for this uaID.
+					map.browser2UaID[util.getHash(found)] = uaID;
 				}
 			}
-			callback({
-				code: 'testswarm-response',
-				info: 'Invalid API response'
-			});
+
+			userAgents = results.swarmstate.userAgents;
+
+			for (key in userAgents) {
+				foundPrecision = 0;
+				found = false;
+				uaID = key;
+				uaData = userAgents[uaID].data;
+				results.browsers.forEach(find);
+				map.uaID2Browser[uaID] = found;
+			}
+
+			callback(null, map);
 		});
+	},
+
+	/**
+	 * @param {string} uaID: Key in swarmstate useragents.
+	 * @return {string|undefined} The browser object or undefined.
+	 */
+	getBrowserFromUaID: function (uaID) {
+		return mapCache.uaID2Browser[uaID];
 	},
 
 	/**
@@ -124,46 +316,9 @@ self = {
 	 * @return {string|undefined} The uaID or undefined.
 	 */
 	getUaIdFromWorker: function (worker) {
-		var key;
-		if (!workerToUaId) {
-			// Lazy-init
-			workerToUaId = util.generateReverseMap(browserMap);
-		}
 
-		key = util.getHash(worker.browser);
-
-		return workerToUaId[key];
-	},
-	/**
-	 * Spawn a new BrowserStack worker.
-	 * @param {Object} browser
-	 */
-	spawnWorker: function (browser) {
-		if (config.browserstack.dryRun) {
-            util.log({
-                action: 'spawn',
-                browser: browser,
-                dryrun: true
-            });
-			return;
-		}
-		var client = self.getBsClient(),
-			browserSettings = _.extend({
-				url: config.testswarm.runUrl,
-				timeout: config.browserstack.workerTimeout
-			}, browser);
-
-		client.createWorker(browserSettings, function (err, worker) {
-			if (err) {
-				this.error('action=spawnworker error=' + ' browser= ' + JSON.stringify(browser), browser, err);
-				return;
-			}
-            util.log({
-                action: 'spawn',
-                browser: browser,
-                worker: worker
-            });
-		});
+		var key = util.getHash(worker.browser);
+		return mapCache.browser2UaID[key];
 	},
 
 	/**
@@ -171,36 +326,12 @@ self = {
 	 * @param {string} ua
 	 */
 	spawnWorkerByUa: function (ua) {
-		if (browserMap[ua]) {
-			self.spawnWorker(browserMap[ua]);
+		var tpl = self.getBrowserFromUaID(ua);
+		if (tpl) {
+			self.browserstack.spawnWorker(tpl);
 		} else {
 			this.error('[spawnWorkerByUa] Error:'.red + ' Unknown uaId: ' + ua);
 		}
-	},
-
-	/**
-	 * @param {number} worker The worker id.
-	 */
-	terminateWorker: function (worker) {
-		if (config.browserstack.dryRun) {
-            util.log({
-                action: 'terminate',
-                worker: worker,
-                dryrun: true
-            });
-			return;
-		}
-		var client = self.getBsClient();
-		client.terminateWorker(worker, function (err) {
-			if (err) {
-				console.error('[terminateWorker] Error:'.red + ' Worker #' + worker + '\n', err);
-				return;
-			}
-            util.log({
-                action: 'terminate',
-                worker: worker
-            });
-		});
 	},
 
 	/**
@@ -209,7 +340,7 @@ self = {
 	 * @param liveWorkers Array: List of workers
 	 * @param liveSwarmState Object: Info about current state of the testswarm
 	 */
-	updateBrowsers: function (liveWorkers, liveSwarmState) {
+	runInternal: function (liveWorkers, liveSwarmState) {
 		var
 			uaId,
 			ua,
@@ -249,7 +380,7 @@ self = {
 		// Task 0: Initialize perception.
 		// Also, simplify our data and make it easier to access.
 		if (config.verbose) {
-			util.log('\n== Task 0 ==\n'.white.bold);
+			console.log('\n== Task 0 ==\n'.white.bold);
 		}
 
 		percSwarmStats = {};
@@ -257,7 +388,7 @@ self = {
 		workersByUa = {};
 
 		for (ua in liveSwarmState.userAgents) {
-			if (browserMap[ua]) {
+			if (self.getBrowserFromUaID(ua)) {
 				percSwarmStats[ua] = util.copy(liveSwarmState.userAgents[ua].stats);
 				workersByUa[ua] = 0;
 			}
@@ -266,7 +397,7 @@ self = {
 		liveWorkers.forEach(function (worker) {
 			percWorkers[worker.id] = {
 				status: worker.status,
-				browser: _.pick(worker, 'os', 'version', 'browser')
+				browser: _.pick(worker, 'os', 'version', 'browser', 'device')
 			};
 
 			uaId = self.getUaIdFromWorker(percWorkers[worker.id]);
@@ -275,26 +406,23 @@ self = {
 			}
 		});
 
+		util.log({
+			action: 'summary',
+			data: (function () {
+				var ua, summary = {};
+				for (ua in workersByUa) {
+					if (workersByUa[ua]) {
+						summary[ua] = workersByUa[ua];
+					}
+				}
+				return summary;
+			}())
+		});
 		if (config.verbose) {
-            util.log('Summary:', (function () {
-                var ua, summary = {};
-                for (ua in workersByUa) {
-                    if (workersByUa[ua]) {
-                        summary[ua] = workersByUa[ua];
-                    }
-                }
-                return summary;
-            }()));
-        }
-
-        util.log({
-            action: 'liveWorkers',
-            liveWorkers: percWorkers
-        });
-		if (config.verbose) {
+			util.log('Live workers:\n', percWorkers, '\n');
 			util.log('Live swarm state:\n', percSwarmStats, '\n');
 
-			util.log('\n== Task 1 ==\n'.white.bold);
+			console.log('\n== Task 1 ==\n'.white.bold);
 		}
 
 		// Task 1: Terminate no longer needed workers
@@ -328,7 +456,7 @@ self = {
 					});
 				}
 
-				self.terminateWorker(workerId);
+				self.browserstack.terminateWorker(workerId);
 				worker.status = 'terminated';
 
 				// Update perception
@@ -349,7 +477,7 @@ self = {
 					});
 				}
 
-				self.terminateWorker(workerId);
+				self.browserstack.terminateWorker(workerId);
 				worker.status = 'terminated';
 
 				// Update perception
@@ -367,13 +495,13 @@ self = {
 		// each online so that they can work asynchronous. And then, in Task 2, we'll
 		// fill in extra workers if possible.
 		if (config.verbose) {
-			util.log('\n== Task 2 ==\n'.white.bold);
+			console.log('\n== Task 2 ==\n'.white.bold);
 		}
 
 		for (ua in percSwarmStats) {
 			stats = percSwarmStats[ua];
 			if (stats.pendingRuns > 0 && stats.onlineClients === 0 && workersByUa[ua] === 0) {
-				self.spawnWorker(browserMap[ua]);
+				self.browserstack.spawnWorker(self.getBrowserFromUaID(ua));
 
 				// Update perception
 				stats.onlineClients += 1;
@@ -384,7 +512,7 @@ self = {
 		// Task 3: Compute the neediness of browsers and spawncr the most
 		// needed browser. Keep doing so until the available slots are filled.
 		if (config.verbose) {
-			util.log('\n== Task 3 ==\n'.white.bold);
+			console.log('\n== Task 3 ==\n'.white.bold);
 		}
 
 		function workerTotal() {
@@ -428,34 +556,34 @@ self = {
 			return neediest;
 		}
 
-        util.log({
-            action: 'stats',
-            workers: workerTotal(),
-            limit: config.browserstack.totalLimit
-        });
+		util.log({
+			action: 'stats',
+			workers: workerTotal(),
+			limit: config.browserstack.totalLimit
+		});
 		while (workerTotal() < config.browserstack.totalLimit) {
 			result = getNeediest();
 			if (result.priority <= 0) {
-                util.log({
-                    action: 'notice',
-                    message: 'Neediness exhausted, done!'
-                });
+				util.log({
+					action: 'notice',
+					message: 'Neediness exhausted, done!'
+				});
 				break;
 			} else {
 				if (config.verbose) {
 					util.log('Most needed:', result);
 				}
-				self.spawnWorker(browserMap[result.ua]);
+				self.browserstack.spawnWorker(self.getBrowserFromUaID(result.ua));
 
 				// Update perception
 				percSwarmStats[result.ua].onlineClients += 1;
 				workersByUa[result.ua] += 1;
 			}
-            util.log({
-                action: 'looping',
-                workers: workerTotal(),
-                limit: config.browserstack.totalLimit
-            });
+			util.log({
+				action: 'looping',
+				workers: workerTotal(),
+				limit: config.browserstack.totalLimit
+			});
 		}
 
 	},
@@ -463,7 +591,7 @@ self = {
 	run: function () {
 		async.parallel({
 			currentWorkers: function (callback) {
-				self.getBsClient().getWorkers(function (err, resp) {
+				self.browserstack.getClient().getWorkers(function (err, resp) {
 					if (err) {
 						console.error('Failed to get list of workers', err);
 					}
@@ -471,7 +599,7 @@ self = {
 				});
 			},
 			swarmState: function (callback) {
-				self.getSwarmState(function (err, state) {
+				self.testswarm.getState(function (err, state) {
 					if (state) {
 						callback(null, state);
 					} else {
@@ -485,39 +613,33 @@ self = {
 				});
 			}
 		}, function (err, results) {
-			self.updateBrowsers(results.currentWorkers, results.swarmState);
-		});
-	},
-
-	terminateAll: function () {
-		var client = self.getBsClient();
-		client.getWorkers(function (err, workers) {
-			if (err) {
-				console.error('Could not get workers from browserstack');
-				return;
-			}
-			if (!workers || workers.length < 1) {
-				util.log('No workers running or queued');
-			}
-			workers.forEach(function (worker) {
-				self.terminateWorker(worker.id);
-			});
-		});
-	},
-
-	getWorker: function (id) {
-		var client = self.getBsClient();
-		client.getWorker(id, function (err, worker) {
-			if (err) {
-				console.error('Could not get worker info from browserstack');
-				return;
-			}
-			if (!worker) {
-				util.log('No worker info available');
-			}
-			util.log('Worker #' + id + ':\n', worker);
+			self.runInternal(results.currentWorkers, results.swarmState);
 		});
 	}
 };
 
-module.exports = self;
+module.exports = {
+	/**
+	 * Set configuration variables
+	 * @param {Object} options Overrides keys in config with given values.
+	 */
+	extendConfig: function (options) {
+		if (options) {
+			util.extendObject(config, options, /* deep = */ true);
+		}
+	},
+
+	init: function (callback) {
+		async.parallel({
+			map: function (callback) {
+				self.getMap(callback);
+			}
+		}, function (err, results) {
+			if (err) {
+				throw err;
+			}
+			mapCache = results.map;
+			callback(self);
+		});
+	}
+};

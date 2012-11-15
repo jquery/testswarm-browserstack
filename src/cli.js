@@ -56,15 +56,16 @@ program
 	.option('--config [path]', 'path to config file with options (defaults to ./config.json)', './config.json')
 	.option('--run', 'Retrieve TestSwarm state and spawn/terminate BrowserStack workers as needed')
 	.option('--run-loop <timeout>', 'Execute --run in a non-overlapping loop with set timeout (in seconds) between iterations', Number)
+	.option('--ua2bs <id>', 'Get BrowserStack worker template from TestSwarm useragent id ("*" to show all)')
 	.option('--worker <id>', 'Get info abuot a specific BrowserStack worker', Number)
-	.option('--spawn <uaId>', 'Spwawn a BrowserStack worker by swarm useragent id (joining the swarm)')
 	.option('--terminate <id>', 'Terminate a specific BrowserStack worker', Number)
 	.option('--terminateAll', 'Terminate all BrowserStack workers')
+	.option('--spawn <uaId>', 'Spwawn a BrowserStack worker by swarm useragent id (joining the swarm)')
 	.option('-v, --verbose', 'Output debug information (through console.log)')
 	.option('--dry, --dry-run', 'Simulate spawning and termination of browserstack workers')
 	.parse(process.argv);
 
-if (!program.run && !program.runLoop && !program.worker && !program.spawn && !program.terminate && !program.terminateAll) {
+if (!program.run && !program.runLoop && !program.ua2bs && !program.worker && !program.terminate && !program.terminateAll && !program.spawn) {
 	console.log(program.helpInformation());
 	return;
 }
@@ -78,47 +79,59 @@ if (!cliConfig) {
 }
 
 tsbs.extendConfig(cliConfig);
+tsbs.init(function (tsbs) {
 
-config = tsbs.getConfig();
+	config = tsbs.getConfig();
 
-if (program.verbose) {
-	config.verbose = true;
-}
+	if (program.verbose) {
+		config.verbose = true;
+	}
 
-if (program.dryRun) {
-	config.browserstack.dryRun = true;
-}
-
-
-if (!confContains(config.browserstack, ['user', 'pass'], 'browserstack.')) {
-	process.exit(1);
-}
+	if (program.dryRun) {
+		config.browserstack.dryRun = true;
+	}
 
 
-// Execute actions
-
-if (program.worker) {
-	tsbs.getWorker(program.worker);
-}
-
-if (program.terminateAll) {
-	tsbs.terminateAll();
-} else if (program.terminate) {
-	tsbs.terminateWorker(program.terminate);
-}
-
-if (program.spawn) {
-	tsbs.spawnWorkerByUa(program.spawn);
-}
-
-if (program.run || program.runLoop) {
-	if (!confContains(config.testswarm, ['root', 'runUrl'], 'testswarm.')) {
+	if (!confContains(config.browserstack, ['user', 'pass'], 'browserstack.')) {
 		process.exit(1);
 	}
 
-	if (program.runLoop) {
-		runLoop();
-	} else {
-		tsbs.run();
+
+	// Execute actions
+
+	if (program.ua2bs === '*') {
+		tsbs.getMap(function (err, map) {
+			console.log('[getMap]', err || map);
+		});
+	} else if (program.ua2bs) {
+		tsbs.getBrowserFromUaID(program.ua2bs, function (err, browser) {
+			console.log('[getBrowserFromUaID] ' + program.ua2bs, err || browser);
+		});
 	}
-}
+
+	if (program.worker) {
+		tsbs.browserstack.getWorker(program.worker);
+	}
+
+	if (program.terminateAll) {
+		tsbs.browserstack.terminateAll();
+	} else if (program.terminate) {
+		tsbs.browserstack.terminateWorker(program.terminate);
+	}
+
+	if (program.spawn) {
+		tsbs.spawnWorkerByUa(program.spawn);
+	}
+
+	if (program.run || program.runLoop) {
+		if (!confContains(config.testswarm, ['root', 'runUrl'], 'testswarm.')) {
+			process.exit(1);
+		}
+
+		if (program.runLoop) {
+			runLoop();
+		} else {
+			tsbs.run();
+		}
+	}
+});
