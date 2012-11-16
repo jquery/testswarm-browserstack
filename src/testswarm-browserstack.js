@@ -221,81 +221,127 @@ self = {
 			}
 		}, function (err, results) {
 			var userAgents,
+				ptsMap,
 				foundPrecision, found, uaID, uaData,
 				key;
+
+			/** @return number */
+			function compare(browser, uaData) {
+				var valid, precision, browserData, parts;
+
+				valid = true;
+				precision = 0;
+
+				// Create a uaData-like object from browserstack's worker browser template
+				browserData = {};
+				browserData.browserFamily = mapHelper.browserstack[browser.browser] || browser.browser;
+				browserData.osFamily = mapHelper.browserstack[browser.os] || browser.os;
+				browserData.deviceFamily = mapHelper.browserstack[browser.device] || browser.device;
+
+				// BrowserStack API v2 has no version properties for OS, except when there is a device.
+				// And in that case it puts the os version in the browser version property...
+				parts = browser.version.split('.');
+				if (!browserData.deviceFamily) {
+					browserData.browserMajor = parts[0];
+					browserData.browserMinor = parts[1];
+					browserData.browserPatch = parts[2];
+				} else {
+					browserData.osMajor = parts[0];
+					browserData.osMinor = parts[1];
+					browserData.osPatch = parts[2];
+				}
+
+				// Apply normalisation mapping
+				uaData.browserFamily = mapHelper.testswarm[uaData.browserFamily] || uaData.browserFamily;
+				uaData.osFamily = mapHelper.testswarm[uaData.osFamily] || uaData.osFamily;
+				uaData.deviceFamily = mapHelper.testswarm[uaData.deviceFamily] || uaData.deviceFamily;
+
+				// If the wildcard is used and a later precision variable is also
+				// defined, then this doesn't work (e.g. "major: 4, minor: 1*, patch: 2",
+				// indexOf will look for 4, 4.1 and 4.1.2). Which is the reward bad input.
+				_.each(uaData, function (value, key) {
+					var ptsKey, pts;
+
+					// The uaData also contains empty placeholders, don't compare those.
+					// Also skip TestSwarm meta-data like 'displayInfo' (objects, not strings).
+					if (!value || typeof value !== 'string') {
+						return;
+					}
+
+					// If there is a level of detail not available for comparison,
+					// we can't accept it, regardless of the match points
+					// (e.g. "browserstack: foo 12" vs. "testswarM: Foo 12.1"),
+					// the useragent is unlikely to be needed by the swarm (could be 12.0, 12.5, etc.)
+					if (!browserData[key]) {
+						valid = false;
+						return;
+					}
+
+					// Process wildcards
+					if (/(Major|Minor|Patch)$/.test(key) && value.substr(-1) === '*') {
+						value = value.slice(0, -1);
+						browserData[key] = browserData[key].substr(0, value.length);
+					}
+
+					// All tolerations, mappings, wildcards and normalisation has taken place.
+					// If it doesn't match here, it is a worker for a different browser.
+					if (value.toLowerCase() !== browserData[key].toLowerCase()) {
+						valid = false;
+						return;
+					}
+
+					// Add points for this key
+					ptsKey = /^([a-z]+)[A-Z]/.exec(key) || [];
+					pts = ptsMap[ptsKey[1]] || 0;
+
+					precision += pts;
+				});
+
+				return valid === true ? precision : 0;
+			}
+
+			function handleBrowser(browser) {
+				var precision = compare(browser, uaData);
+
+				if (precision) {
+					// The map from browser to uaID needs to be done from here instead
+					// of afterwards (like for map.uaID2Browser).
+					// There can be more than 1 browser template that satisfy a uaID.
+					// We only need 1 match to spawn, but we need them all for termination and calculation
+					// of neediness ("iOS 5.1" can be an iPhone, iPad etc. "Safari 5.1" can be Win or Mac).
+					// Without this, Math.random will decide whether we recognize our own children next run.
+					map.browser2UaID[util.getHash(browser)] = uaID;
+				}
+
+				if (precision > foundPrecision) {
+					found = browser;
+					foundPrecision = precision;
+				}
+			}
 
 			if (err) {
 				callback(err, map);
 				return;
 			}
 
+			userAgents = results.swarmstate.userAgents;
+
 			// browser data: 100 pt
 			// os data: 10 pt
 			// device data: 1pt
-			// asumption: data has no more than 9 keys
-			function find(browser) {
-				var
-					precision = 0,
-					browserFamily = mapHelper.values[browser.browser] || browser.browser,
-					browserVersion = browser.version,
-					osFamily = mapHelper.values[browser.os] || browser.os,
-					deviceFamily = mapHelper.values[browser.device] || browser.device;
-
-				if (browserFamily === uaData.browserFamily.toLowerCase()) {
-					precision += 100;
-					if (!deviceFamily) {
-						if (browserVersion.indexOf(uaData.browserMajor) === 0) {
-							precision += 100;
-						}
-						if (browserVersion.indexOf(uaData.browserMajor + '.' + uaData.browserMinor) === 0) {
-							precision += 100;
-						}
-						if (browserVersion.indexOf(uaData.browserMajor + '.' + uaData.browserMinor + uaData.browserPatch) === 0) {
-							precision += 100;
-						}
-					}
-				}
-				if (osFamily === uaData.osFamily) {
-					precision += 10;
-					// BrowserStack API v2 has no versioning for OS, except for special devices.
-					// And in that case it puts the os version in the browser version property...
-					if (deviceFamily) {
-						if (browserVersion.indexOf(uaData.osMajor) === 0) {
-							precision += 10;
-						}
-						if (browserVersion.indexOf(uaData.osMajor + '.' + uaData.osMinor) === 0) {
-							precision += 10;
-						}
-						if (browserVersion.indexOf(uaData.osMajor + '.' + uaData.osMinor + uaData.osPatch) === 0) {
-							precision += 10;
-						}
-					}
-				}
-				if (deviceFamily === uaData.deviceFamily) {
-					precision += 1;
-				}
-				if (precision > foundPrecision) {
-					found = browser;
-					foundPrecision = precision;
-					// The map from browser to uaID needs to be done from here instead
-					// of afterwards,  because there can be more than 1 browser template
-					// that correspond to the same uaID. Although we only need 1 within this run,
-					// it can be a different one next run (pretty much random if two are equally
-					// precise, which ever is returned first in the api). To avoid us from
-					// not recognizing workers for uaID from earlier runs, keep track of all
-					// possible browser templates for this uaID.
-					map.browser2UaID[util.getHash(found)] = uaID;
-				}
-			}
-
-			userAgents = results.swarmstate.userAgents;
+			// asumption: each data set has no more than 9 keys
+			ptsMap = {
+				browser: 100,
+				os: 10,
+				device: 1
+			};
 
 			for (key in userAgents) {
 				foundPrecision = 0;
 				found = false;
 				uaID = key;
 				uaData = userAgents[uaID].data;
-				results.browsers.forEach(find);
+				results.browsers.forEach(handleBrowser);
 				map.uaID2Browser[uaID] = found;
 			}
 
@@ -603,7 +649,7 @@ self = {
 					if (state) {
 						callback(null, state);
 					} else {
-						console.error('Failed to get testswarm state', err);
+						console.error('Failed to get testswarm state', err, state);
 						// TODO handle err, for now just continue pretending there are no needs
 						// by giving it an empty object.
 						callback(null, {

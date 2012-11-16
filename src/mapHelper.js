@@ -7,8 +7,10 @@
  *   https://github.com/browserstack/api
  *   http://api.browserstack.com/2/browsers (requires authentication)
  */
-// These are in the direction: browserstack -> testswarm.
-var values = {
+var browserstack, testswarm;
+
+// These are in the direction: browserstack -> testswarm-mapped.
+browserstack = {
 	'win': 'Windows',
 	'mac': 'Mac OS X',
 	'android': 'Android',
@@ -26,6 +28,20 @@ var values = {
 	'iPhone 5': 'iPhone'
 };
 
+// These are in the direction: testswarm -> browsertack-mapped.
+testswarm = {
+	// BrowserStack API (v2) doesn't give different windows versions,
+	// so we'll have to use that for now. This is probably fine since
+	// BrowserStack does have different windows versions internally
+	// (e.g. IE 6 is WinXP, IE 10 is on Win8).
+	// This is needed to make "Safari 5.1 on Windows XP" in TestSwarm work.
+	'Windows XP': 'Windows',
+	'Windows Vista': 'Windows',
+	'Windows 7': 'Windows',
+	'Windows 8': 'Windows'
+};
+
 module.exports = {
-	values: values
+	browserstack: browserstack,
+	testswarm: testswarm
 };
