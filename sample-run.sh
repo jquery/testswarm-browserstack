@@ -5,5 +5,5 @@
 #
 node /path/to/testswarm-browserstack/src/cli.js\
  --config "/path/to/testswarm-browserstack/config.json"\
- --run-loop 50\
+ --run-loop 60\
  >> /var/log/testswarm-browserstack/cli.log 2>&1;
