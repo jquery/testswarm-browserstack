@@ -96,21 +96,16 @@ function generateReverseMap(map) {
 logColors = {
 	dryRun: 'cyan',
 	spawn: 'green',
-	terminate: 'yellow'
+	terminate: 'yellow',
+	warning: 'red',
+	fatal: 'red'
 };
+
 function log(data) {
 	var prefix, msg, key, value, dryRun;
 
-	prefix = new Date() + ': ';
+	prefix = new Date() + ':';
 	msg = '';
-
-	// Plain log
-	if (!isObject(data) || arguments.length > 1) {
-		value = [].slice.call(arguments);
-		value.unshift(msg);
-		console.log.apply(console, value);
-		return;
-	}
 
 	if (!data.action) {
 		data.action = 'unspecified';
@@ -126,7 +121,7 @@ function log(data) {
 		if (isObject(value)) {
 			value = JSON.stringify(value);
 		}
-		msg += key + '=' + value + ' ';
+		msg += ' ' + key + '=' + String(value).trim();
 	}
 
 	if (logColors[data.action]) {
@@ -134,11 +129,24 @@ function log(data) {
 	}
 
 	if (dryRun) {
-		msg = 'dryRun=true '[logColors.dryRun] + msg;
+		msg = ' dryRun=true'[logColors.dryRun] + msg;
 	}
 
 	console.log(prefix + msg);
 }
+
+['warning', 'fatal'].forEach(function (type) {
+	log[type] = function (message, info) {
+		var data = {
+			action: type,
+			message: message
+		};
+		if (info !== undefined) {
+			data.info = info;
+		}
+		log(data);
+	};
+});
 
 module.exports = {
 	extendObject: extendObject,

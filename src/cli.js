@@ -4,6 +4,7 @@ var fs = require('fs'),
 	program = require('commander'),
 	spawn = require('child_process').spawn,
 	tsbs = require('./testswarm-browserstack'),
+	util = require('./util'),
 	cliConfig,
 	config,
 	child;
@@ -36,12 +37,10 @@ function runLoop() {
 		program.dryRun ? '--dry-run' : ''
 	]);
 	child.stdout.on('data', function (data) {
-		console.log(String(data));
+		process.stdout.write(String(data));
 	});
 	child.stderr.on('data', function (data) {
-		console.error(
-			'\t' + String(data).replace(/\n/g, '\n\t')
-		);
+		util.log.fatal(String(data).trim());
 	});
 	child.on('exit', function () {
         if (config.verbose) {
@@ -110,17 +109,38 @@ tsbs.init(function (tsbs) {
 	}
 
 	if (program.worker) {
-		tsbs.browserstack.getWorker(program.worker);
+		tsbs.browserstack.getWorker(program.worker, function (err, worker) {
+			if (err) {
+				console.error('Could not get worker info from browserstack', err);
+				return;
+			}
+			if (!worker) {
+				console.log('No worker info available');
+			} else {
+				console.log('Worker #' + program.worker + ':\n', worker);
+			}
+		});
 	}
 
 	if (program.terminateAll) {
-		tsbs.browserstack.terminateAll();
+		tsbs.browserstack.terminateAll(function (err, workers) {
+			if (err) {
+				console.error('Could not get workers from browserstack');
+			}
+			if (!workers || workers.length < 1) {
+				console.log('No workers running or queued');
+			}
+		});
 	} else if (program.terminate) {
 		tsbs.browserstack.terminateWorker(program.terminate);
 	}
 
 	if (program.spawn) {
-		tsbs.spawnWorkerByUa(program.spawn);
+		tsbs.spawnWorkerByUa(program.spawn, function (err) {
+			if (err) {
+				console.error(err);
+			}
+		});
 	}
 
 	if (program.run || program.runLoop) {

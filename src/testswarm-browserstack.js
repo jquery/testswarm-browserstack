@@ -81,18 +81,12 @@ self = {
 			return bsClient;
 		},
 
-		getWorker: function (id) {
-			var client = self.browserstack.getClient();
-			client.getWorker(id, function (err, worker) {
-				if (err) {
-					console.error('Could not get worker info from browserstack');
-					return;
-				}
-				if (!worker) {
-					util.log('No worker info available');
-				}
-				util.log('Worker #' + id + ':\n', worker);
-			});
+		/**
+		 * @param {number} worker The worker id.
+		 * @param {Function} callback
+		 */
+		getWorker: function (id, callback) {
+			self.browserstack.getClient().getWorker(id, callback);
 		},
 
 		/**
@@ -109,27 +103,24 @@ self = {
 			}
 			var client = self.browserstack.getClient();
 			client.terminateWorker(worker, function (err) {
-				if (err) {
-					console.error('[terminateWorker] Error:'.red + ' Worker #' + worker + '\n', err);
-					return;
-				}
 				util.log({
 					action: 'terminate',
 					worker: worker
 				});
+				if (err) {
+					util.log.warning('Terminating worker failed', err);
+				}
 			});
 		},
 
-		terminateAll: function () {
+		terminateAll: function (callback) {
 			var client = self.browserstack.getClient();
 			client.getWorkers(function (err, workers) {
 				if (err) {
-					console.error('Could not get workers from browserstack');
+					callback(err);
 					return;
 				}
-				if (!workers || workers.length < 1) {
-					util.log('No workers running or queued');
-				}
+				callback(null, workers);
 				workers.forEach(function (worker) {
 					self.browserstack.terminateWorker(worker.id);
 				});
@@ -370,13 +361,15 @@ self = {
 	/**
 	 * Spawn a new BrowserStack worker, by uaId.
 	 * @param {string} ua
+	 * @param {Function} callback
 	 */
-	spawnWorkerByUa: function (ua) {
+	spawnWorkerByUa: function (ua, callback) {
 		var tpl = self.getBrowserFromUaID(ua);
 		if (tpl) {
 			self.browserstack.spawnWorker(tpl);
+			callback();
 		} else {
-			this.error('[spawnWorkerByUa] Error:'.red + ' Unknown uaId: ' + ua);
+			callback('Unknown uaId');
 		}
 	},
 
@@ -465,8 +458,8 @@ self = {
 			}())
 		});
 		if (config.verbose) {
-			util.log('Live workers:\n', percWorkers, '\n');
-			util.log('Live swarm state:\n', percSwarmStats, '\n');
+			console.log('Live workers:\n', percWorkers, '\n');
+			console.log('Live swarm state:\n', percSwarmStats, '\n');
 
 			console.log('\n== Task 1 ==\n'.white.bold);
 		}
@@ -487,7 +480,7 @@ self = {
 				if (config.verbose) {
 					// This worker was either created by a different script or by a another version
 					// of this script with different ua map.
-					util.log('Found worker for which there is no match in UA map', worker);
+					util.log.warning('Found worker for which there is no match in UA map', worker);
 				}
 				continue;
 			}
@@ -516,12 +509,7 @@ self = {
 			// isn't 'queue' anymore) but hasn't loaded the browser yet. In the future
 			// with event-based testswarm we'll be able to more closely determine this.
 			} else if (worker.status === 'running' && stats.onlineClients === 0) {
-				if (config.verbose) {
-					util.log('Running worker disconnected from the swarm:', {
-						worker: worker,
-						stats: stats
-					});
-				}
+				util.log.warning('Running worker disconnected from the swarm', { id: workerId, worker: worker });
 
 				self.browserstack.terminateWorker(workerId);
 				worker.status = 'terminated';
@@ -611,13 +599,17 @@ self = {
 			result = getNeediest();
 			if (result.priority <= 0) {
 				util.log({
-					action: 'notice',
+					action: 'info',
 					message: 'Neediness exhausted, done!'
 				});
 				break;
 			} else {
 				if (config.verbose) {
-					util.log('Most needed:', result);
+					util.log({
+						action: 'info',
+						message: 'Most needed:',
+						info: result
+					});
 				}
 				self.browserstack.spawnWorker(self.getBrowserFromUaID(result.ua));
 
@@ -626,7 +618,7 @@ self = {
 				workersByUa[result.ua] += 1;
 			}
 			util.log({
-				action: 'looping',
+				action: 'stats',
 				workers: workerTotal(),
 				limit: config.browserstack.totalLimit
 			});
@@ -639,22 +631,22 @@ self = {
 			currentWorkers: function (callback) {
 				self.browserstack.getClient().getWorkers(function (err, resp) {
 					if (err) {
-						console.error('Failed to get list of workers', err);
+						util.log.warning('Failed to get list of workers', err);
 					}
 					callback(err, resp);
 				});
 			},
 			swarmState: function (callback) {
 				self.testswarm.getState(function (err, state) {
-					if (state) {
-						callback(null, state);
-					} else {
-						console.error('Failed to get testswarm state', err, state);
+					if (err) {
+						util.log.warning('Failed to get testswarm state', err);
 						// TODO handle err, for now just continue pretending there are no needs
 						// by giving it an empty object.
 						callback(null, {
 							userAgents: {}
 						});
+					} else {
+						callback(null, state);
 					}
 				});
 			}
