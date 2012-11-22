@@ -33,6 +33,20 @@ var async = require('async'),
 
 require('colors');
 
+
+/**
+ * I don't like the way the worker objects come from the
+ * API. Split it up so that we have a browser property
+ * that matches the one from /browsers for spawn.
+ */
+function fixWorker(worker) {
+	return worker.browser && worker.browser.version && worker || {
+		id: worker.id,
+		status: worker.status,
+		browser: _.pick(worker, 'os', 'version', 'browser', 'device')
+	};
+}
+
 /**
  * Terminology:
  *
@@ -90,22 +104,25 @@ self = {
 		},
 
 		/**
-		 * @param {number} worker The worker id.
+		 * @param {Object} worker The worker object.
 		 */
 		terminateWorker: function (worker) {
+			worker = fixWorker(worker);
 			if (config.browserstack.dryRun) {
 				util.log({
 					action: 'terminate',
-					worker: worker,
+					browser: worker.browser,
+					worker: _.omit(worker, 'browser'),
 					dryRun: true
 				});
 				return;
 			}
 			var client = self.browserstack.getClient();
-			client.terminateWorker(worker, function (err) {
+			client.terminateWorker(worker.id, function (err) {
 				util.log({
 					action: 'terminate',
-					worker: worker
+					browser: worker.browser,
+					worker: _.omit(worker, 'browser')
 				});
 				if (err) {
 					util.log.warning('Terminating worker failed', err);
@@ -122,7 +139,7 @@ self = {
 				}
 				callback(null, workers);
 				workers.forEach(function (worker) {
-					self.browserstack.terminateWorker(worker.id);
+					self.browserstack.terminateWorker(worker);
 				});
 			});
 		},
@@ -434,10 +451,7 @@ self = {
 		}
 
 		liveWorkers.forEach(function (worker) {
-			percWorkers[worker.id] = {
-				status: worker.status,
-				browser: _.pick(worker, 'os', 'version', 'browser', 'device')
-			};
+			percWorkers[worker.id] = fixWorker(worker);
 
 			uaId = self.getUaIdFromWorker(percWorkers[worker.id]);
 			if (uaId) {
@@ -495,7 +509,7 @@ self = {
 					});
 				}
 
-				self.browserstack.terminateWorker(workerId);
+				self.browserstack.terminateWorker(worker);
 				worker.status = 'terminated';
 
 				// Update perception
@@ -509,9 +523,9 @@ self = {
 			// isn't 'queue' anymore) but hasn't loaded the browser yet. In the future
 			// with event-based testswarm we'll be able to more closely determine this.
 			} else if (worker.status === 'running' && stats.onlineClients === 0) {
-				util.log.warning('Running worker disconnected from the swarm', { id: workerId, worker: worker });
+				util.log.warning('Running worker disconnected from the swarm', worker);
 
-				self.browserstack.terminateWorker(workerId);
+				self.browserstack.terminateWorker(worker);
 				worker.status = 'terminated';
 
 				// Update perception
