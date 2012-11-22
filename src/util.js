@@ -1,5 +1,7 @@
-var logColors;
-require('colors');
+var colors = require('colors'),
+	logColors;
+
+colors.mode = require('tty').isatty(process.stdout.fd) ? 'console' : 'none';
 
 /**
  * Like typeof === 'object' but more accurate.
@@ -102,34 +104,26 @@ logColors = {
 };
 
 function log(data) {
-	var prefix, msg, key, value, dryRun;
+	var action, prefix, msg;
 
-	prefix = new Date() + ':';
-	msg = '';
-
-	if (!data.action) {
-		data.action = 'unspecified';
+	if (data.action) {
+		action = data.action;
+		delete data.action;
+	} else {
+		action = 'unspecified';
 	}
+
+	prefix = '[' + new Date().toUTCString() + '] ';
+
+	msg = [
+		'action=' + action,
+		JSON.stringify(data)
+	].join(' ');
 
 	if (data.dryRun) {
-		delete data.dryRun;
-		dryRun = true;
-	}
-
-	for (key in data) {
-		value = data[key];
-		if (isObject(value)) {
-			value = JSON.stringify(value);
-		}
-		msg += ' ' + key + '=' + String(value).trim();
-	}
-
-	if (logColors[data.action]) {
-		msg = msg[logColors[data.action]];
-	}
-
-	if (dryRun) {
-		msg = ' dryRun=true'[logColors.dryRun] + msg;
+		msg = msg[logColors.dryRun];
+	} else if (logColors[action]) {
+		msg = msg[logColors[action]];
 	}
 
 	console.log(prefix + msg);
