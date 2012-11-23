@@ -132,7 +132,7 @@ tsbs.init(function (tsbs) {
 			}
 		});
 	} else if (program.terminate) {
-		tsbs.browserstack.terminateWorker(program.terminate);
+		tsbs.browserstack.terminateWorker({ id: program.terminate });
 	}
 
 	if (program.spawn) {

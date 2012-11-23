@@ -125,7 +125,7 @@ self = {
 					worker: _.omit(worker, 'browser')
 				});
 				if (err) {
-					util.log.warning('Terminating worker failed', err);
+					util.log.warning('Terminating worker failed', { worker: worker, err: err });
 				}
 			});
 		},
