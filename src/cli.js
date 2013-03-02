@@ -56,7 +56,7 @@ program
 	.option('--run', 'Retrieve TestSwarm state and spawn/terminate BrowserStack workers as needed')
 	.option('--run-loop <timeout>', 'Execute --run in a non-overlapping loop with set timeout (in seconds) between iterations', Number)
 	.option('--ua2bs <id>', 'Get BrowserStack worker template from TestSwarm useragent id ("*" to show all)')
-    .option('--listWorkers', 'List all active BrowserStack workers')
+	.option('--listWorkers', 'List all active BrowserStack workers')
 	.option('--worker <id>', 'Get info about a specific BrowserStack worker', Number)
 	.option('--terminate <id>', 'Terminate a specific BrowserStack worker', Number)
 	.option('--terminateAll', 'Terminate all BrowserStack workers')
