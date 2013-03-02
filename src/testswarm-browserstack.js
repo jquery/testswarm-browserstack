@@ -96,6 +96,14 @@ self = {
 		},
 
 		/**
+		 * Get a list of all workers
+		 * @param {Function} callback
+		 */
+		getWorkers: function (callback) {
+			self.browserstack.getClient().getWorkers(callback);
+		},
+
+		/**
 		 * @param {number} worker The worker id.
 		 * @param {Function} callback
 		 */

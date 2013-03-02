@@ -56,7 +56,8 @@ program
 	.option('--run', 'Retrieve TestSwarm state and spawn/terminate BrowserStack workers as needed')
 	.option('--run-loop <timeout>', 'Execute --run in a non-overlapping loop with set timeout (in seconds) between iterations', Number)
 	.option('--ua2bs <id>', 'Get BrowserStack worker template from TestSwarm useragent id ("*" to show all)')
-	.option('--worker <id>', 'Get info abuot a specific BrowserStack worker', Number)
+    .option('--listWorkers', 'List all active BrowserStack workers')
+	.option('--worker <id>', 'Get info about a specific BrowserStack worker', Number)
 	.option('--terminate <id>', 'Terminate a specific BrowserStack worker', Number)
 	.option('--terminateAll', 'Terminate all BrowserStack workers')
 	.option('--spawn <uaId>', 'Spwawn a BrowserStack worker by swarm useragent id (joining the swarm)')
@@ -64,7 +65,7 @@ program
 	.option('--dry, --dry-run', 'Simulate spawning and termination of browserstack workers')
 	.parse(process.argv);
 
-if (!program.run && !program.runLoop && !program.ua2bs && !program.worker && !program.terminate && !program.terminateAll && !program.spawn) {
+if (!program.run && !program.runLoop && !program.ua2bs && !program.listWorkers && !program.worker && !program.terminate && !program.terminateAll && !program.spawn) {
 	console.log(program.helpInformation());
 	return;
 }
@@ -105,6 +106,20 @@ tsbs.init(function (tsbs) {
 	} else if (program.ua2bs) {
 		tsbs.getBrowserFromUaID(program.ua2bs, function (err, browser) {
 			console.log('[getBrowserFromUaID] ' + program.ua2bs, err || browser);
+		});
+	}
+
+	if (program.listWorkers) {
+		tsbs.browserstack.getWorkers(function (err, workers) {
+			if (err) {
+				console.error('Could not get worker list from browserstack', err);
+				return;
+			}
+			if (!workers || workers.length < 1) {
+				console.log('No workers running or queued');
+			} else {
+				console.log(workers);
+			}
 		});
 	}
 
