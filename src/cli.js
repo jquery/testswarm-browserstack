@@ -43,9 +43,9 @@ function runLoop() {
 		util.log.fatal(String(data).trim());
 	});
 	child.on('exit', function () {
-        if (config.verbose) {
-		    console.log('Next iteration in ' + program.runLoop + ' seconds...');
-        }
+		if (config.verbose) {
+			console.log('Next iteration in ' + program.runLoop + ' seconds...');
+		}
 		setTimeout(runLoop, program.runLoop * 1000);
 	});
 }

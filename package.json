@@ -20,6 +20,9 @@
 		"type": "git",
 		"url": "git://github.com/clarkbox/testswarm-browserstack.git"
 	},
+	"scripts": {
+		"test": "jshint ."
+	},
 	"dependencies": {
 		"async": "0.1.x",
 		"browserstack": "~0.1.0",
@@ -28,8 +31,6 @@
 		"request": "2.9.x",
 		"underscore": "1.4.2"
 	},
-	"devDependencies": {},
-	"optionalDependencies": {},
 	"engines": {
 		"node": "*"
 	}
