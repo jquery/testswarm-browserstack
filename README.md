@@ -54,7 +54,7 @@ If you plan to run it from a scheduler and keep log files, you're recommended to
     "user": "example",
     "pass": "*******"
   },
-  "testswarwm": {
+  "testswarm": {
     "root": "http://ci.example.org/testswarm",
     "runUrl": "http://c.example.org/testswarm/run/JohnDoe"
   }
