@@ -165,7 +165,7 @@ self = {
 
 			client.createWorker(browserSettings, function (err, worker) {
 				if (err) {
-					this.error('action=spawnworker error=' + ' browser= ' + JSON.stringify(browser), browser, err);
+					util.log.warning('Spawn error for browser', { browser: browser, err: err });
 					return;
 				}
 				util.log({
