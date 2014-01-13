@@ -21,11 +21,13 @@ browserstack = {
 	'iPad 2 (5.0)': 'iPad',
 	'iPad 3rd': 'iPad',
 	'iPad 3rd (6.0)': 'iPad',
+	'iPad 3rd (7.0)': 'iPad',
 	'iPhone 3GS': 'iPhone',
 	'iPhone 4': 'iPhone',
 	'iPhone 4S': 'iPhone',
 	'iPhone 4S (6.0)': 'iPhone',
-	'iPhone 5': 'iPhone'
+	'iPhone 5': 'iPhone',
+	'iPhone 5S': 'iPhone'
 };
 
 // These are in the direction: testswarm -> browsertack-mapped.
