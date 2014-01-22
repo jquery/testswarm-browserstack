@@ -7,12 +7,12 @@
  *   https://github.com/browserstack/api
  *   http://api.browserstack.com/2/browsers (requires authentication)
  */
-var browserstack, testswarm;
+var browserstack;
 
 // These are in the direction: browserstack -> testswarm-mapped.
 browserstack = {
-	'win': 'Windows',
-	'mac': 'Mac OS X',
+	'Windows': 'Windows',
+	'OS X': 'Mac OS X',
 	'android': 'Android',
 	'ios': 'iOS',
 	// BrowserStack puts device version inside device family.
@@ -22,6 +22,7 @@ browserstack = {
 	'iPad 3rd': 'iPad',
 	'iPad 3rd (6.0)': 'iPad',
 	'iPad 3rd (7.0)': 'iPad',
+	'iPad Mini': 'iPad',
 	'iPhone 3GS': 'iPhone',
 	'iPhone 4': 'iPhone',
 	'iPhone 4S': 'iPhone',
@@ -30,20 +31,6 @@ browserstack = {
 	'iPhone 5S': 'iPhone'
 };
 
-// These are in the direction: testswarm -> browsertack-mapped.
-testswarm = {
-	// BrowserStack API (v2) doesn't give different windows versions,
-	// so we'll have to use that for now. This is probably fine since
-	// BrowserStack does have different windows versions internally
-	// (e.g. IE 6 is WinXP, IE 10 is on Win8).
-	// This is needed to make "Safari 5.1 on Windows XP" in TestSwarm work.
-	'Windows XP': 'Windows',
-	'Windows Vista': 'Windows',
-	'Windows 7': 'Windows',
-	'Windows 8': 'Windows'
-};
-
 module.exports = {
-	browserstack: browserstack,
-	testswarm: testswarm
+	browserstack: browserstack
 };
