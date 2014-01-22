@@ -87,7 +87,7 @@ self = {
 			// Lazy init
 			if (!bsClient) {
 				bsClient = browserstack.createClient({
-					version: 2,
+					version: 3,
 					username: config.browserstack.user,
 					password: config.browserstack.pass
 				});
@@ -246,23 +246,21 @@ self = {
 				browserData.osFamily = mapHelper.browserstack[browser.os] || browser.os;
 				browserData.deviceFamily = mapHelper.browserstack[browser.device] || browser.device;
 
-				// BrowserStack API v2 has no version properties for OS, except when there is a device.
-				// And in that case it puts the os version in the browser version property...
-				parts = browser.version.split('.');
-				if (!browserData.deviceFamily) {
-					browserData.browserMajor = parts[0];
-					browserData.browserMinor = parts[1];
-					browserData.browserPatch = parts[2];
-				} else {
+				// Some os_version fields in BrowserStack API v3 are numbers but not all, e.g. there's XP
+				// and Opera uses resolutions.
+				if (/^([0-9]+\.)*[0-9]+$/.test(browser.os_version)) {
+					parts = browser.os_version.split('.');
 					browserData.osMajor = parts[0];
 					browserData.osMinor = parts[1];
 					browserData.osPatch = parts[2];
 				}
-
-				// Apply normalisation mapping
-				uaData.browserFamily = mapHelper.testswarm[uaData.browserFamily] || uaData.browserFamily;
-				uaData.osFamily = mapHelper.testswarm[uaData.osFamily] || uaData.osFamily;
-				uaData.deviceFamily = mapHelper.testswarm[uaData.deviceFamily] || uaData.deviceFamily;
+				// Some browsers have the browser_version field not defined.
+				if (browser.browser_version) {
+					parts = browser.browser_version.split('.');
+					browserData.browserMajor = parts[0];
+					browserData.browserMinor = parts[1];
+					browserData.browserPatch = parts[2];
+				}
 
 				// If the wildcard is used and a later precision variable is also
 				// defined, then this doesn't work (e.g. "major: 4, minor: 1*, patch: 2",
