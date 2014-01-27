@@ -51,7 +51,7 @@ function runLoop() {
 }
 
 program
-	.version('0.2.0')
+	.version(loadAndParseConfigFile(__dirname + '/../package.json').version)
 	.option('--config [path]', 'path to config file with options (defaults to ./config.json)', './config.json')
 	.option('--run', 'Retrieve TestSwarm state and spawn/terminate BrowserStack workers as needed')
 	.option('--run-loop <timeout>', 'Execute --run in a non-overlapping loop with set timeout (in seconds) between iterations', Number)
