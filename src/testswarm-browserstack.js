@@ -40,10 +40,23 @@ require('colors');
  * that matches the one from /browsers for spawn.
  */
 function fixWorker(worker) {
-	return worker.browser && worker.browser.version && worker || {
+	return worker.browser && worker.browser.os && worker || {
 		id: worker.id,
 		status: worker.status,
-		browser: _.pick(worker, 'os', 'version', 'browser', 'device')
+		browser: _.defaults(
+			_.pick(
+				worker,
+				'os',
+				'os_version',
+				// Optional. Mobile has .device, desktop has .browser/.browser_version
+				'browser',
+				'browser_version',
+				'device'
+			),
+			// FIXME: browserstack-api/v3 has a bug where /browsers has null values
+			// but /workers does not, so our hash keys don't match..
+			{ browser: null, browser_version: null, device: null }
+		)
 	};
 }
 
@@ -276,7 +289,7 @@ self = {
 
 					// If there is a level of detail not available for comparison,
 					// we can't accept it, regardless of the match points
-					// (e.g. "browserstack: foo 12" vs. "testswarM: Foo 12.1"),
+					// (e.g. "browserstack: foo 12" vs. "testswarm: Foo 12.1"),
 					// the useragent is unlikely to be needed by the swarm (could be 12.0, 12.5, etc.)
 					if (!browserData[key]) {
 						valid = false;
@@ -307,6 +320,16 @@ self = {
 			}
 
 			function handleBrowser(browser) {
+				// FIXME: browserstack-api/v3 has a bug where /browsers has a browser family
+				// for mobile browsers (e.g. "Mobile Safari" for iOS), but /workers does not
+				// so it never matches.. as a work around, delete the worker.browser property
+				// from our browser2UaID map so that it matches the hash we'll create via fixWorker().
+				// This works because browserstack only has 1 browser family per os/device.
+				// If this ever changes though, this will need to be changed.
+				if (browser.os && browser.device && browser.browser) {
+					browser.browser = null;
+				}
+
 				var precision = compare(browser, uaData);
 
 				if (precision) {
@@ -368,7 +391,6 @@ self = {
 	 * @return {string|undefined} The uaID or undefined.
 	 */
 	getUaIdFromWorker: function (worker) {
-
 		var key = util.getHash(worker.browser);
 		return mapCache.browser2UaID[key];
 	},
