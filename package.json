@@ -23,7 +23,7 @@
     "url": "git://github.com/clarkbox/testswarm-browserstack.git"
   },
   "scripts": {
-    "test": "jshint ."
+    "test": "jshint . && jscs src/"
   },
   "dependencies": {
     "async": "0.1.x",
