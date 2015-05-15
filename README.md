@@ -1,5 +1,7 @@
-# testswarm-browserstack [![Build Status](https://travis-ci.org/clarkbox/testswarm-browserstack.png)](https://travis-ci.org/clarkbox/testswarm-browserstack)
-This is a light weight integration layer between [TestSwarm](https://github.com/jquery/testswarm) and [BrowserStack](http://www.browserstack.com/). Use it to spawn BrowserStack workers needed by TestSwarm on demand.
+[![Build Status](https://travis-ci.org/clarkbox/testswarm-browserstack.svg?branch=master)](https://travis-ci.org/clarkbox/testswarm-browserstack)
+
+# testswarm-browserstack
+This is a light weight integration layer between [TestSwarm](https://github.com/jquery/testswarm) and [BrowserStack](https://www.browserstack.com/). Use it to spawn BrowserStack workers needed by TestSwarm on demand.
 
 This script is currently compatible with:
 * [TestSwarm](https://github.com/jquery/testswarm) 1.0.0-alpha or higher
