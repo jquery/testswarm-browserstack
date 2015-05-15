@@ -1,37 +1,40 @@
 {
-	"name": "testswarm-browserstack",
-	"version": "0.3.0",
-	"description": "Integration layer between TestSwarm and BrowserStack",
-	"keywords": [
-		"testswarm",
-		"browserstack"
-	],
-	"homepage": "https://github.com/clarkbox/testswarm-browserstack",
-	"author": {
-		"name": "clarkbox",
-		"web": "https://github.com/clarkbox"
-	},
-	"contributors": [{
-		"name": "Timo Tijhof",
-		"web": "https://github.com/Krinkle"
-	}],
-	"main": "src/testswarm-browserstack.js",
-	"repository": {
-		"type": "git",
-		"url": "git://github.com/clarkbox/testswarm-browserstack.git"
-	},
-	"scripts": {
-		"test": "jshint ."
-	},
-	"dependencies": {
-		"async": "0.1.x",
-		"browserstack": "~1.0.1",
-		"colors": "~0.6.0",
-		"commander": "0.6.x",
-		"request": "2.9.x",
-		"underscore": "1.4.2"
-	},
-	"engines": {
-		"node": "*"
-	}
+  "name": "testswarm-browserstack",
+  "version": "0.3.0",
+  "description": "Integration layer between TestSwarm and BrowserStack",
+  "keywords": [
+    "testswarm",
+    "browserstack"
+  ],
+  "homepage": "https://github.com/clarkbox/testswarm-browserstack",
+  "author": {
+    "name": "clarkbox",
+    "web": "https://github.com/clarkbox"
+  },
+  "contributors": [
+    {
+      "name": "Timo Tijhof",
+      "web": "https://github.com/Krinkle"
+    }
+  ],
+  "main": "src/testswarm-browserstack.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/clarkbox/testswarm-browserstack.git"
+  },
+  "scripts": {
+    "test": "jshint ."
+  },
+  "dependencies": {
+    "async": "0.1.x",
+    "browserstack": "~1.0.1",
+    "colors": "~0.6.0",
+    "commander": "0.6.x",
+    "request": "2.9.x",
+    "underscore": "1.4.2"
+  },
+  "devDependencies": {
+    "jscs": "1.13.1",
+    "jshint": "2.6.3"
+  }
 }
