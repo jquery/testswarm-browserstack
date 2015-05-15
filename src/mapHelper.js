@@ -17,22 +17,24 @@ browserstack = {
 	'ios': 'iOS',
 	// BrowserStack puts device version inside device family.
 	// Normalise them here, we use OS version instead.
-	'iPad 2 (5.0)': 'iPad',
+	'iPad': 'iPad',
 	'iPad 2': 'iPad',
-	'iPad 3rd (6.0)': 'iPad',
-	'iPad 3rd (7.0)': 'iPad',
+	'iPad 2 (5.0)': 'iPad',
 	'iPad 3rd': 'iPad',
-	'iPad 4th Gen': 'iPad',
+	'iPad 3rd (6.0)': 'iPad',
+	'iPad 4th': 'iPad',
 	'iPad Air': 'iPad',
-	'iPad mini Retina': 'iPad',
 	'iPad Mini': 'iPad',
+	'iPad Mini 2': 'iPad',
 	'iPhone 3GS': 'iPhone',
 	'iPhone 4': 'iPhone',
-	'iPhone 4S (6.0)': 'iPhone',
 	'iPhone 4S': 'iPhone',
+	'iPhone 4S (6.0)': 'iPhone',
 	'iPhone 5': 'iPhone',
 	'iPhone 5C': 'iPhone',
-	'iPhone 5S': 'iPhone'
+	'iPhone 5S': 'iPhone',
+	'iPhone 6': 'iPhone',
+	'iPhone 6 Plus': 'iPhone'
 };
 
 module.exports = {
