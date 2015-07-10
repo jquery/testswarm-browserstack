@@ -11,10 +11,15 @@ var browserstack;
 
 // These are in the direction: browserstack -> testswarm-mapped.
 browserstack = {
+	// Browser
+	'yandex': 'Yandex Browser',
+
+	// OS
 	'Windows': 'Windows',
 	'OS X': 'Mac OS X',
 	'android': 'Android',
 	'ios': 'iOS',
+
 	// BrowserStack puts device version inside device family.
 	// Normalise them here, we use OS version instead.
 	'iPad': 'iPad',
