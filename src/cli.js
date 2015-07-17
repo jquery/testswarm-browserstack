@@ -100,12 +100,10 @@ tsbs.init(function (tsbs) {
 
 	if (program.ua2bs === '*') {
 		tsbs.getMap(function (err, map) {
-			console.log('[getMap]', err || map);
+			console.log('[getMap]', err || map.uaID2Browser);
 		});
 	} else if (program.ua2bs) {
-		tsbs.getBrowserFromUaID(program.ua2bs, function (err, browser) {
-			console.log('[getBrowserFromUaID] ' + program.ua2bs, err || browser);
-		});
+		console.log('[getBrowserFromUaID] ' + program.ua2bs, tsbs.getBrowserFromUaID(program.ua2bs) || false);
 	}
 
 	if (program.worker) {
