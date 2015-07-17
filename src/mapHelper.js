@@ -13,6 +13,7 @@ var browserstack;
 browserstack = {
 	// Browser
 	'yandex': 'Yandex Browser',
+	'Android Browser': 'Android',
 
 	// OS
 	'Windows': 'Windows',
