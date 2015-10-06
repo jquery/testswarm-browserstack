@@ -66,7 +66,7 @@ If you plan to run it from a scheduler and keep log files, you're recommended to
 ##  cli.js
 --------------------------------------
 
-This is a nodejs cli wrapper around testswarm-browserstack.js. Use --help to get all the information you need to know (see above for example usage):
+This is a nodejs cli wrapper around testswarm-browserstack.js. You can use it independent of testswarm. Use --help to get all the information you need to know (see above for example usage):
 
 ```
   Usage: cli.js [options]
