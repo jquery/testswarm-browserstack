@@ -243,68 +243,100 @@ self = {
 		}, function (err, results) {
 			var userAgents,
 				ptsMap,
-				foundPrecision, found, uaID, uaData,
+				foundPrecision, found, uaID, tsUaSpec,
 				key;
 
-			/** @return number */
-			function compare(browser, uaData) {
-				var valid, precision, browserData, parts;
+			/**
+			 * @param {Object} bswDesc BrowserStack worker descriptor
+			 * @param {string} bswDesc.browser
+			 * @param {string} bswDesc.browser_version
+			 * @param {string} bswDesc.os
+			 * @param {string} bswDesc.os_version
+			 * @param {string} bswDesc.device
+			 * @param {Object} tsUaSpec TestSwarm User agent requirement
+			 * @param {string} tsUaSpec.browserFamily
+			 * @param {string} tsUaSpec.browserMajor
+			 * @param {string} tsUaSpec.browserMinor
+			 * @param {string} tsUaSpec.osFamily
+			 * @param {string} tsUaSpec.osMajor
+			 * @param {string} tsUaSpec.osMinor
+			 * @param {string} tsUaSpec.deviceFamily
+			 * @return number
+			 */
+			function compare(bswDesc, tsUaSpec) {
+				var valid, precision, bswUaSpec, parts;
 
 				valid = true;
 				precision = 0;
 
-				// Create a uaData-like object from browserstack's worker browser template
-				browserData = {};
-				browserData.browserFamily = mapHelper.browserstack[browser.browser] || browser.browser;
-				browserData.osFamily = mapHelper.browserstack[browser.os] || browser.os;
-				browserData.deviceFamily = mapHelper.browserstack[browser.device] || browser.device;
+				// Convert bswDesc into a tsUaSpec-like object to aid comparison
+				bswUaSpec = {
+					browserFamily: bswDesc.browser,
+					osFamily: bswDesc.os,
+					deviceFamily: bswDesc.device
+				};
 
-				// Some os_version fields in BrowserStack API v3 are numbers but not all, e.g. there's XP
-				// and Opera uses resolutions.
-				if (/^([0-9]+\.)*[0-9]+$/.test(browser.os_version)) {
-					parts = browser.os_version.split('.');
-					browserData.osMajor = parts[0];
-					browserData.osMinor = parts[1];
-					browserData.osPatch = parts[2];
+				// Some os_version fields in BrowserStack API v3 are numbers but not all,
+				// e.g. it has an OS entry "opera" which is divided by screen resolution
+				// rather than OS version.
+				if (/^([0-9]+\.)*[0-9]+$/.test(bswDesc.os_version)) {
+					parts = bswDesc.os_version.split('.');
+					bswUaSpec.osMajor = parts[0];
+					bswUaSpec.osMinor = parts[1];
+					bswUaSpec.osPatch = parts[2];
 				}
-				// Some browsers have the browser_version field not defined.
-				if (browser.browser_version) {
-					parts = browser.browser_version.split('.');
-					browserData.browserMajor = parts[0];
-					browserData.browserMinor = parts[1];
-					browserData.browserPatch = parts[2];
+				// Some browserstack workers don't define browser_version.
+				if (bswDesc.browser_version) {
+					parts = bswDesc.browser_version.split('.');
+					bswUaSpec.browserMajor = parts[0];
+					bswUaSpec.browserMinor = parts[1];
+					bswUaSpec.browserPatch = parts[2];
 				}
 
-				// If the wildcard is used and a later precision variable is also
-				// defined, then this doesn't work (e.g. "major: 4, minor: 1*, patch: 2",
-				// indexOf will look for 4, 4.1 and 4.1.2). Which is the reward bad input.
-				_.each(uaData, function (value, key) {
+				_.each(tsUaSpec, function (value, key) {
 					var ptsKey, pts;
 
-					// The uaData also contains empty placeholders, don't compare those.
+					// The tsUaSpec also contains empty placeholders, don't compare those.
 					// Also skip TestSwarm meta-data like 'displayInfo' (objects, not strings).
 					if (!value || typeof value !== 'string') {
 						return;
 					}
 
-					// If there is a level of detail not available for comparison,
-					// we can't accept it, regardless of the match points
-					// (e.g. "browserstack: foo 12" vs. "testswarm: Foo 12.1"),
-					// the useragent is unlikely to be needed by the swarm (could be 12.0, 12.5, etc.)
-					if (!browserData[key]) {
+					// If a property from the TestSwarm requirement doesn't exist in the BrowserStack
+					// worker description, assume it doesn't match.
+					// E.g. If tsUaSpec requires a major+minor version (e.g. "21.1"), but BrowserStack
+					// only specifies the major version.
+					if (!bswUaSpec[key]) {
 						valid = false;
 						return;
 					}
 
 					// Process wildcards
+					// This requires the wildcard to be the last specified segment.
+					// "major: 4, minor: 1*" is fine.
+					// "major: 4, minor: 1*, patch: 2" is unsupported.
 					if (/(Major|Minor|Patch)$/.test(key) && value.substr(-1) === '*') {
 						value = value.slice(0, -1);
-						browserData[key] = browserData[key].substr(0, value.length);
+						bswUaSpec[key] = bswUaSpec[key].substr(0, value.length);
 					}
 
-					// All tolerations, mappings, wildcards and normalisation has taken place.
+					if (mapHelper[key] && mapHelper[key][value]) {
+						value = mapHelper[key][value];
+					}
+
+					// Value can either be a string or regular expression (from mapHelper)
 					// If it doesn't match here, it is a worker for a different browser.
-					if (value.toLowerCase() !== browserData[key].toLowerCase()) {
+					if (typeof value === 'string') {
+						if (value.toLowerCase() !== bswUaSpec[key].toLowerCase()) {
+							valid = false;
+							return;
+						}
+					} else if (value.test) {
+						if (!value.test(bswUaSpec[key])) {
+							valid = false;
+							return;
+						}
+					} else {
 						valid = false;
 						return;
 					}
@@ -319,18 +351,18 @@ self = {
 				return valid === true ? precision : 0;
 			}
 
-			function handleBrowser(browser) {
+			function handleBrowser(bswDesc) {
 				// FIXME: browserstack-api/v3 has a bug where /browsers has a browser family
 				// for mobile browsers (e.g. "Mobile Safari" for iOS), but /workers does not
 				// so it never matches.. as a work around, delete the worker.browser property
 				// from our browser2UaID map so that it matches the hash we'll create via fixWorker().
 				// This works because browserstack only has 1 browser family per os/device.
 				// If this ever changes though, this will need to be changed.
-				if (browser.os && browser.device && browser.browser) {
-					browser.browser = null;
+				if (bswDesc.os && bswDesc.device && bswDesc.browser) {
+					bswDesc.browser = null;
 				}
 
-				var precision = compare(browser, uaData);
+				var precision = compare(bswDesc, tsUaSpec);
 
 				if (precision) {
 					// The map from browser to uaID needs to be done from here instead
@@ -339,11 +371,11 @@ self = {
 					// We only need 1 match to spawn, but we need them all for termination and calculation
 					// of neediness ("iOS 5.1" can be an iPhone, iPad etc. "Safari 5.1" can be Win or Mac).
 					// Without this, Math.random will decide whether we recognize our own children next run.
-					map.browser2UaID[util.getHash(browser)] = uaID;
+					map.browser2UaID[util.getHash(bswDesc)] = uaID;
 				}
 
 				if (precision > foundPrecision) {
-					found = browser;
+					found = bswDesc;
 					foundPrecision = precision;
 				}
 			}
@@ -369,7 +401,7 @@ self = {
 				foundPrecision = 0;
 				found = false;
 				uaID = key;
-				uaData = userAgents[uaID].data;
+				tsUaSpec = userAgents[uaID].data;
 				results.browsers.forEach(handleBrowser);
 				map.uaID2Browser[uaID] = found;
 			}
