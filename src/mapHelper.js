@@ -30,8 +30,10 @@ browserstack = {
 	'iPad 3rd (6.0)': 'iPad',
 	'iPad 4th': 'iPad',
 	'iPad Air': 'iPad',
+	'iPad Air 2': 'iPad',
 	'iPad Mini': 'iPad',
 	'iPad Mini 2': 'iPad',
+	'iPad Mini 4': 'iPad',
 	'iPhone 3GS': 'iPhone',
 	'iPhone 4': 'iPhone',
 	'iPhone 4S': 'iPhone',
@@ -40,7 +42,9 @@ browserstack = {
 	'iPhone 5C': 'iPhone',
 	'iPhone 5S': 'iPhone',
 	'iPhone 6': 'iPhone',
-	'iPhone 6 Plus': 'iPhone'
+	'iPhone 6 Plus': 'iPhone',
+	'iPhone 6S': 'iPhone',
+	'iPhone 6S Plus': 'iPhone'
 };
 
 module.exports = {
