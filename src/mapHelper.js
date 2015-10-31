@@ -25,8 +25,8 @@ module.exports = {
 	// Normalise them here, we use OS version instead.
 	deviceFamily: {
 		// Match "iPad 2", "iPad 3rd (6.0)", "iPad Air 2", etc.
-		'iPad': /^iPad/,
+		'iPad': /^iPad\b/,
 		// Match "iPhone 4", "iPhone 4S (6.0)", "iPhone 6S Plus", etc.
-		'iPhone': /^iPhone/
+		'iPhone': /^iPhone\b/
 	}
 };

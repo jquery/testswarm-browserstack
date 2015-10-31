@@ -331,7 +331,7 @@ self = {
 							valid = false;
 							return;
 						}
-					} else if (value.test) {
+					} else if (typeof value.test === 'function') {
 						if (!value.test(bswUaSpec[key])) {
 							valid = false;
 							return;
