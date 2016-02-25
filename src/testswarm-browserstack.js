@@ -100,7 +100,7 @@ self = {
 			// Lazy init
 			if (!bsClient) {
 				bsClient = browserstack.createClient({
-					version: 3,
+					version: 4,
 					username: config.browserstack.user,
 					password: config.browserstack.pass
 				});
