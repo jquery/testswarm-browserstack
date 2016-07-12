@@ -1,6 +1,6 @@
 {
   "name": "testswarm-browserstack",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Integration layer between TestSwarm and BrowserStack",
   "keywords": [
     "testswarm",
