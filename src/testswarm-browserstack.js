@@ -592,7 +592,7 @@ self = {
 		// Note: This is the only case where we ignore the total limit to use the 'queue'
 		// system of browserstack to start all browsers that are needed without question.
 		// It also bypasses priority because it is more important to get at least 1 of
-		// each online so that they can work asynchronous. And then, in Task 2, we'll
+		// each online so that they can work asynchronous. And then, in Task 3, we'll
 		// fill in extra workers if possible.
 		if (config.verbose) {
 			console.log('\n== Task 2 ==\n'.white.bold);
