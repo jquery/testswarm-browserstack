@@ -352,16 +352,6 @@ self = {
 			}
 
 			function handleBrowser(bswDesc) {
-				// FIXME: browserstack-api/v3 has a bug where /browsers has a browser family
-				// for mobile browsers (e.g. "Mobile Safari" for iOS), but /workers does not
-				// so it never matches.. as a work around, delete the worker.browser property
-				// from our browser2UaID map so that it matches the hash we'll create via fixWorker().
-				// This works because browserstack only has 1 browser family per os/device.
-				// If this ever changes though, this will need to be changed.
-				if (bswDesc.os && bswDesc.device && bswDesc.browser) {
-					bswDesc.browser = null;
-				}
-
 				var precision = compare(bswDesc, tsUaSpec);
 
 				if (precision) {
