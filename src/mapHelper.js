@@ -21,6 +21,7 @@ module.exports = {
 		'Android': 'android',
 		'iOS': 'ios'
 	},
+
 	// BrowserStack puts device version inside device family.
 	// Normalise them here, we use OS version instead.
 	deviceFamily: {

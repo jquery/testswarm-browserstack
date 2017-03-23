@@ -1,0 +1,17 @@
+{
+	"extends": "jquery",
+	"parserOptions": {
+		"ecmaVersion": 5
+	},
+	"env": {
+		"node": true
+	},
+	"rules": {
+		"space-in-parens": 0,
+		"computed-property-spacing": 0,
+		"space-before-function-paren": 0,
+		"array-bracket-spacing": 0,
+		"lines-around-comment": 0,
+		"quotes": [ 2, "single" ]
+	}
+}

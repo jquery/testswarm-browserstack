@@ -23,7 +23,7 @@
     "url": "git://github.com/clarkbox/testswarm-browserstack.git"
   },
   "scripts": {
-    "test": "jshint . && jscs src/"
+    "test": "eslint ."
   },
   "dependencies": {
     "async": "^0.1.22",
@@ -34,7 +34,7 @@
     "underscore": "^1.4.2"
   },
   "devDependencies": {
-    "jscs": "1.13.1",
-    "jshint": "2.6.3"
+    "eslint": "^3.18.0",
+    "eslint-config-jquery": "^1.0.1"
   }
 }

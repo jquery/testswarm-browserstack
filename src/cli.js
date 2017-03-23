@@ -18,7 +18,10 @@ function loadAndParseConfigFile(filePath) {
 function confContains(conf, props, prefix) {
 	for (var i = 0, len = props.length; i < len; i += 1) {
 		if (!conf || conf[props[i]] === undefined) {
-			console.log('Configuration file invalid or missing required parameter:', (prefix || '') + props[i]);
+			console.log(
+				'Configuration file invalid or missing required parameter:',
+				(prefix || '') + props[i]
+			);
 			return false;
 		}
 	}
@@ -52,20 +55,32 @@ function runLoop() {
 
 program
 	.version(loadAndParseConfigFile(__dirname + '/../package.json').version)
-	.option('--config [path]', 'path to config file with options (defaults to ./config.json)', './config.json')
+	.option('--config [path]',
+		'path to config file with options (defaults to ./config.json)',
+		'./config.json'
+	)
 	.option('--run', 'Retrieve TestSwarm state and spawn/terminate BrowserStack workers as needed')
-	.option('--run-loop <timeout>', 'Execute --run in a non-overlapping loop with set timeout (in seconds) between iterations', Number)
-	.option('--ua2bs <id>', 'Get BrowserStack worker template from TestSwarm useragent id ("*" to show all)')
+	.option('--run-loop <timeout>',
+		'Execute --run in a non-overlapping loop with set timeout (in seconds) between iterations',
+		Number
+	)
+	.option('--ua2bs <id>',
+		'Get BrowserStack worker template from TestSwarm useragent id ("*" to show all)'
+	)
 	.option('--listWorkers', 'List all active BrowserStack workers')
 	.option('--worker <id>', 'Get info about a specific BrowserStack worker', Number)
 	.option('--terminate <id>', 'Terminate a specific BrowserStack worker', Number)
 	.option('--terminateAll', 'Terminate all BrowserStack workers')
-	.option('--spawn <uaId>', 'Spwawn a BrowserStack worker by swarm useragent id (joining the swarm)')
+	.option('--spawn <uaId>',
+		'Spwawn a BrowserStack worker by swarm useragent id (joining the swarm)'
+	)
 	.option('-v, --verbose', 'Output debug information (through console.log)')
 	.option('--dry, --dry-run', 'Simulate spawning and termination of browserstack workers')
 	.parse(process.argv);
 
-if (!program.run && !program.runLoop && !program.ua2bs && !program.listWorkers && !program.worker && !program.terminate && !program.terminateAll && !program.spawn) {
+if (!program.run && !program.runLoop && !program.ua2bs && !program.listWorkers &&
+	!program.worker && !program.terminate && !program.terminateAll && !program.spawn
+) {
 	console.log(program.helpInformation());
 	return;
 }
@@ -74,7 +89,11 @@ if (!program.run && !program.runLoop && !program.ua2bs && !program.listWorkers &
 
 cliConfig = loadAndParseConfigFile(program.config);
 if (!cliConfig) {
-	console.error('Configuration file missing or invalid.\nSpecify the file path in the --config parameter (defaults to ./config.json, use config-sample.json as template).');
+	console.error(
+		'Configuration file missing or invalid.\n' +
+		'Specify the file path in the --config parameter ' +
+		'(defaults to ./config.json, use config-sample.json as template).'
+	);
 	process.exit(1);
 }
 
@@ -104,7 +123,10 @@ tsbs.init(function (tsbs) {
 			console.log('[getMap]', err || map.uaID2Browser);
 		});
 	} else if (program.ua2bs) {
-		console.log('[getBrowserFromUaID] ' + program.ua2bs, tsbs.getBrowserFromUaID(program.ua2bs) || false);
+		console.log(
+			'[getBrowserFromUaID] ' + program.ua2bs,
+			tsbs.getBrowserFromUaID(program.ua2bs) || false
+		);
 	}
 
 	if (program.worker) {

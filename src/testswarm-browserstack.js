@@ -204,31 +204,33 @@ self = {
 		 * @param {Function} callback
 		 */
 		getState: function (callback) {
-			request.get(config.testswarm.root + '/api.php?action=swarmstate', function (err, res, body) {
-				var apiData;
-				if (err) {
+			request.get(config.testswarm.root + '/api.php?action=swarmstate',
+				function (err, res, body) {
+					var apiData;
+					if (err) {
+						callback({
+							code: 'node-request',
+							info: err
+						});
+						return;
+					}
+					apiData = JSON.parse(body);
+					if (apiData) {
+						if (apiData.error) {
+							callback(apiData.error);
+							return;
+						}
+						if (apiData.swarmstate) {
+							callback(null, apiData.swarmstate);
+							return;
+						}
+					}
 					callback({
-						code: 'node-request',
-						info: err
+						code: 'testswarm-response',
+						info: 'Invalid API response'
 					});
-					return;
 				}
-				apiData = JSON.parse(body);
-				if (apiData) {
-					if (apiData.error) {
-						callback(apiData.error);
-						return;
-					}
-					if (apiData.swarmstate) {
-						callback(null, apiData.swarmstate);
-						return;
-					}
-				}
-				callback({
-					code: 'testswarm-response',
-					info: 'Invalid API response'
-				});
-			});
+			);
 		}
 	},
 
@@ -519,7 +521,7 @@ self = {
 					}
 				}
 				return summary;
-			}())
+			})()
 		});
 		if (config.verbose) {
 			console.log('Live workers:\n', percWorkers, '\n');
