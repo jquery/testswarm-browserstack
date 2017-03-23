@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.org/clarkbox/testswarm-browserstack.svg?branch=master)](https://travis-ci.org/clarkbox/testswarm-browserstack)
+[![Build Status](https://travis-ci.org/clarkbox/testswarm-browserstack.svg?branch=master)](https://travis-ci.org/clarkbox/testswarm-browserstack) [![npm](https://img.shields.io/npm/v/testswarm-browserstack.svg?style=flat)](https://www.npmjs.com/package/testswarm-browserstack)
+
 
 # testswarm-browserstack
 This is a light weight integration layer between [TestSwarm](https://github.com/jquery/testswarm) and [BrowserStack](https://www.browserstack.com/). Use it to spawn BrowserStack workers needed by TestSwarm on demand.
