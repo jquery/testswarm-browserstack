@@ -107,6 +107,20 @@ tsbs.init(function (tsbs) {
 		console.log('[getBrowserFromUaID] ' + program.ua2bs, tsbs.getBrowserFromUaID(program.ua2bs) || false);
 	}
 
+	if (program.listWorkers) {
+		tsbs.browserstack.getWorkers(function (err, workers) {
+			if (err) {
+				console.error('Could not get worker list from browserstack', err);
+				return;
+			}
+			if (!workers || workers.length < 1) {
+				console.log('No workers running or queued');
+			} else {
+				console.log(workers);
+			}
+		});
+	}
+
 	if (program.worker) {
 		tsbs.browserstack.getWorker(program.worker, function (err, worker) {
 			if (err) {
