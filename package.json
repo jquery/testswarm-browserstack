@@ -23,7 +23,8 @@
     "url": "git://github.com/clarkbox/testswarm-browserstack.git"
   },
   "scripts": {
-    "test": "eslint ."
+    "test": "eslint .",
+    "fix": "eslint --fix ."
   },
   "dependencies": {
     "async": "^0.1.22",
