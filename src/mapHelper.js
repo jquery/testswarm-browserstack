@@ -13,12 +13,7 @@
 module.exports = {
 	browserFamily: {
 		'Yandex Browser': 'yandex',
-		'Android': 'Android Browser',
-		// Android 4.4 and higher use Chrome Mobile instead of Android Browser.
-		// BrowserStack supports both Chrome and Firefox on Android through
-		// the UI. However, the v4 API only exposes one of them (Chrome)
-		// but labels it "Android Browser" for back-compat.
-		'Chrome Mobile': 'Android Browser'
+		'Android': 'Android Browser'
 	},
 	osFamily: {
 		'Windows': 'Windows',
