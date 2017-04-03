@@ -335,19 +335,14 @@ self = {
 					}
 
 					// Android 4.3 and below have user agents typically referred to as
-					// "Android Browser" (or "WebView").
-					// Android 4.4, 5.0 and later use "Chrome Mobile".
-					// Android in tablet mode (including emulators) use a slightly different UA
-					// that doesn't mention "Mobile" that causes ua-parser to interpret it as
-					// regular "Chrome". Instead of hardcoding all this in TestSwarm, let them
-					// specify whatever for the icon on the home page and project pages.
+					// "Android Browser" (or the "Web browser" app).
+					// Android 4.4+ use "Chrome Mobile" on phones, and "Chrome" on Tablets.
 					// BrowserStack v3 and v4 APIs only provides the default browser on Android.
 					// In addition, the API wrongly identifies all browsers on Android as
-					// "Android Browser" (even the ones that use "Chrome" or "Chrome Mobile"
-					// in Android 4.4+). Instead of mapping all this (which would require
-					// complicating mapHelper to map browserFamily "Chrome" to "Android Browser",
-					// if and only if osFamily is "Android"), simply ignore browserFamily for
-					// Android and iOS.
+					// "Android Browser" (even the ones that use "Chrome Mobile" in Android 4.4+).
+					// Instead of mapping all this (which would require complicating mapHelper to
+					// map browserFamily "Chrome" to "Android Browser", if osFamily is "Android"),
+					// simply ignore browserFamily for Android and iOS.
 					if ( key === 'browserFamily' &&
 						tsUaSpec.osFamily === 'Android' &&
 						tsUaSpec.osMajor &&
