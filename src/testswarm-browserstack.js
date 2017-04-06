@@ -11,7 +11,7 @@ var async = require( 'async' ),
 			// Per <https://www.browserstack.com/automate/node#builds-projects>
 			// > Allowed characters: letters, digits, spaces, colons, periods, and underscores.
 			// > Other characters (like hyphens or slashes) are not allowed.
-			project: 'testswarm browserstack',
+			project: 'testswarm',
 			// Workers auto-terminate after 15 minutes
 			// if we're ready before that we'll terminate them.
 			// TODO: This is currently rather long, but we don't want to cut
@@ -31,6 +31,8 @@ var async = require( 'async' ),
 		},
 		verbose: false
 	},
+	// Shared ID for all workers spawned from this run
+	buildTimeStart = Date.now(),
 	self,
 	bsClient,
 	mapCache;
@@ -186,7 +188,8 @@ self = {
 				browserSettings = _.extend( {
 					url: config.testswarm.runUrl,
 					timeout: config.browserstack.workerTimeout,
-					project: config.browserstack.project
+					project: config.browserstack.project,
+					build: 'Run ' + buildTimeStart
 				}, browser );
 
 			client.createWorker( browserSettings, function( err, worker ) {
