@@ -182,7 +182,8 @@ self = {
 			var client = self.browserstack.getClient(),
 				browserSettings = _.extend( {
 					url: config.testswarm.runUrl,
-					timeout: config.browserstack.workerTimeout
+					timeout: config.browserstack.workerTimeout,
+					project: config.browserstack.project
 				}, browser );
 
 			client.createWorker( browserSettings, function( err, worker ) {
