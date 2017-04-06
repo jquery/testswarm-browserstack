@@ -41,6 +41,7 @@ If you plan to run it from a scheduler and keep log files, you're recommended to
 #### Options documentation:
 * `browserstack.user`: BrowserStack username
 * `browserstack.pass`: BrowserStack password
+* `browserstack.project`: Project name for grouping on BrowserStack Automate dashboard
 * `browserstack.workerTimeout`: Maximum lifetime of the worker (in seconds). Use `0` for _indefinitely_ (BrowserStack will terminate the worker after the maximum run time, as of writing that maximum is 30 minutes).
 * `browserstack.dryRun`: Enable to only simulate spawning and termination of browserstack workers.
 * `browserstack.totalLimit`: Maximum number of simultaneous workers allowed under this BrowserStack account.

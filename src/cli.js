@@ -16,7 +16,7 @@ function loadAndParseConfigFile( filePath ) {
 }
 
 function confContains( conf, props, prefix ) {
-	for ( var i = 0, len = props.length; i < len; i += 1 ) {
+	for ( var i = 0; i < props.length; i += 1 ) {
 		if ( !conf || conf[ props[ i ] ] === undefined ) {
 			console.log(
 				'Configuration file invalid or missing required parameter:',

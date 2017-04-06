@@ -8,6 +8,7 @@ var async = require( 'async' ),
 		browserstack: {
 			user: undefined,
 			pass: undefined,
+			project: 'testswarm-browserstack',
 			// Workers auto-terminate after 15 minutes
 			// if we're ready before that we'll terminate them.
 			// TODO: This is currently rather long, but we don't want to cut
