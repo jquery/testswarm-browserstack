@@ -57,11 +57,12 @@ function fixWorker( worker ) {
 				// Optional. Mobile has .device, desktop has .browser/.browser_version
 				'browser',
 				'browser_version',
-				'device'
+				'device',
+				'real_mobile'
 			),
 			// FIXME: browserstack-api/v3 has a bug where /browsers has null values
 			// but /workers does not, so our hash keys don't match..
-			{ browser: null, browser_version: null, device: null }
+			{ browser: null, browser_version: null, device: null, real_mobile: null }
 		)
 	};
 }
