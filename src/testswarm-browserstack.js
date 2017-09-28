@@ -329,6 +329,12 @@ self = {
 					bswUaSpec.browserPatch = parts[ 2 ];
 				}
 
+				// BrowserStack's Nexus 9 worker is broken --Krinkle 2017-09-27
+				if ( bswDesc.device === 'Google Nexus 9' ) {
+					valid = false;
+					return;
+				}
+
 				_.each( tsUaSpec, function( value, key ) {
 					var ptsKey, pts;
 
