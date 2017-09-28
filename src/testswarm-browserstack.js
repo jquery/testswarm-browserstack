@@ -35,35 +35,53 @@ var async = require( 'async' ),
 	buildTimeStart = Date.now(),
 	self,
 	bsClient,
+	bsBrowserProps = {},
 	mapCache;
 
 require( 'colors' );
 
 
 /**
- * I don't like the way the worker objects come from the
- * API. Split it up so that we have a browser property
- * that matches the one from /browsers for spawn.
+ * The '/workers' endpoint of the BrowserStack API returns
+ * object with a mixed set of properties, some of which
+ * match '/browsers', and some of which are additional
+ * (e.g. 'id', 'status', 'browser_url'). In order to recognise
+ * the workers we have spawned, fix the object to have a 'browser'
+ * property that contains an object matching the object we used
+ * to spawn it from '/browsers'.
+ *
+ * Both /browsers and /workers appear to change over time with
+ * extra properties without documentation, so regardless of
+ * whether we remove the worker keys or keep the browser keys,
+ * it will break when the other set of keys change.
+ *
+ * After much hackery, try to fix this once and for all by
+ * iterating once over all '/browsers' and memorising all
+ * known keys that can belong to a browser object.
  */
 function fixWorker( worker ) {
-	return worker.browser && worker.browser.os && worker || {
-		id: worker.id,
-		status: worker.status,
-		browser: _.defaults(
-			_.pick(
-				worker,
-				'os',
-				'os_version',
-				// Optional. Mobile has .device, desktop has .browser/.browser_version
-				'browser',
-				'browser_version',
-				'device'
-			),
-			// FIXME: browserstack-api/v3 has a bug where /browsers has null values
-			// but /workers does not, so our hash keys don't match..
-			{ browser: null, browser_version: null, device: null }
-		)
+	var obj, key;
+	if ( !worker.browser.os ) {
+		// This is a flat object from /workers still,
+		// transform it to have a 'browser' property, matching /browsers.
+		obj = {};
+		for ( key in worker ) {
+			if ( bsBrowserProps[ key ] === true ) {
+				obj[ key ] = worker[ key ];
+			}
+		}
+		// Where /browsers has device=null, /workers lacks the property.
+		if ( obj.device === undefined ) {
+			obj.device = null;
+		}
+		// Where /browsers has real_mobile=null, /workers has real_mobile=false.
+		if ( obj.real_mobile === false ) {
+			obj.real_mobile = null;
+		}
+
+		worker.browser = obj;
 	};
+	return worker;
 }
 
 /**
@@ -421,6 +439,13 @@ self = {
 				os: 10,
 				device: 1
 			};
+
+			// This is a hack for the fixWorker() function.
+			results.browsers.forEach( function( bswDesc ) {
+				for ( var key in bswDesc ) {
+					bsBrowserProps[ key ] = true;
+				}
+			} );
 
 			for ( key in userAgents ) {
 				foundPrecision = 0;
