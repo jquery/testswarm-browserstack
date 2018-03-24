@@ -2,10 +2,10 @@
 
 
 # testswarm-browserstack
-This is a light weight integration layer between [TestSwarm](https://github.com/jquery/testswarm) and [BrowserStack](https://www.browserstack.com/). Use it to spawn BrowserStack workers needed by TestSwarm on demand.
+This is a lightweight integration layer between [TestSwarm](https://github.com/jquery/testswarm) and [BrowserStack](https://www.browserstack.com/). Use it to spawn BrowserStack workers needed by TestSwarm on demand. It uses [node-browserstack](https://github.com/scottgonzalez/node-browserstack) to abstract the BrowserStack API.
 
 This script is currently compatible with:
-* [TestSwarm](https://github.com/jquery/testswarm) 1.0.0-alpha or higher
+* [TestSwarm](https://github.com/jquery/testswarm) v1.0.0 or higher
 * [BrowserStack API](https://github.com/browserstack/api) v4
 
 ## Install
