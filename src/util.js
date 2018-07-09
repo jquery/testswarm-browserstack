@@ -126,7 +126,13 @@ function log( data ) {
 		msg = msg[ logColors[ action ] ];
 	}
 
-	console.log( prefix + msg );
+	// Log the error message if one exists as otherwise
+	// it'd be stringified to "{}" which doesn't say much.
+	if ( data.info && data.info.err ) {
+		console.log( prefix + msg, data.info.err );
+	} else {
+		console.log( prefix + msg );
+	}
 }
 
 [ 'warning', 'fatal' ].forEach( function( type ) {
