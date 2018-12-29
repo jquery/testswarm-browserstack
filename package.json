@@ -18,6 +18,9 @@
     }
   ],
   "main": "src/testswarm-browserstack.js",
+  "files": [
+    "src/"
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/clarkbox/testswarm-browserstack.git"
