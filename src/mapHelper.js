@@ -6,14 +6,15 @@
  * - ua-parser: https://github.com/ua-parser/uap-core
  * - BrowserStack:
  *   https://github.com/browserstack/api
- *   http://api.browserstack.com/3/browsers (requires authentication)
+ *   http://api.browserstack.com/4/browsers (requires authentication)
  */
 
 // These are in the direction testswarm (ua-parser) -> browserstack.
 module.exports = {
 	browserFamily: {
 		'Yandex Browser': 'yandex',
-		'Android': 'Android Browser'
+		'Android': 'Android Browser',
+		'Chrome Mobile': 'Android Browser'
 	},
 	osFamily: {
 		'Windows': 'Windows',

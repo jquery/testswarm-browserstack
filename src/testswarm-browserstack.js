@@ -389,17 +389,16 @@ self = {
 
 					// Android 4.3 and below have user agents typically referred to as
 					// "Android Browser" (or the "Web browser" app).
+					//
 					// Android 4.4+ use "Chrome Mobile" on phones, and "Chrome" on Tablets.
-					// BrowserStack v3 and v4 APIs only provides the default browser on Android.
-					// In addition, the API wrongly identifies all browsers on Android as
-					// "Android Browser" (even the ones that use "Chrome Mobile" in Android 4.4+).
-					// Instead of mapping all this (which would require complicating mapHelper to
-					// map browserFamily "Chrome" to "Android Browser", if osFamily is "Android"),
-					// simply ignore browserFamily for Android and iOS.
+					// BrowserStack v3 and v4 APIs only provide the default browser on Android,
+					// and in addition the API (wrongly) identifies this default browser on Android
+					// always as "Android Browser" even when it is "Chrome Mobile" in Android 4.4+.
+					//
+					// Instead of representing all this (which would require complicating mapHelper)
+					// simply ignore browserFamily for Android.
 					if ( key === 'browserFamily' &&
-						tsUaSpec.osFamily === 'Android' &&
-						tsUaSpec.osMajor &&
-						tsUaSpec.osMinor
+						tsUaSpec.osFamily === 'Android'
 					) {
 						return;
 					}
