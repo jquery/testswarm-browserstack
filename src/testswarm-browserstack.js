@@ -293,9 +293,11 @@ self = {
 			 * @param {string} tsUaSpec.browserFamily
 			 * @param {string} tsUaSpec.browserMajor
 			 * @param {string} tsUaSpec.browserMinor
+			 * @param {string} tsUaSpec.browserPatch
 			 * @param {string} tsUaSpec.osFamily
 			 * @param {string} tsUaSpec.osMajor
 			 * @param {string} tsUaSpec.osMinor
+			 * @param {string} tsUaSpec.osPatch
 			 * @param {string} tsUaSpec.deviceFamily
 			 * @return number
 			 */
@@ -406,6 +408,18 @@ self = {
 
 					precision += pts;
 				} );
+
+				// Handle the "os" field in a special way - some browsers on BrowserStack only
+				// define the major part and we want to be able to prefer them when there's
+				// another entry with a matching major that also specifies the minor.
+				// One example is iOS: BrowserStack includes both "10" & "10.3"; the former
+				// is a real device and the latter is an emulator; we want the real device.
+				if ( !tsUaSpec.osMinor && !bswUaSpec.osMinor ) {
+					precision += ptsMap.os || 0;
+				}
+				if ( !tsUaSpec.osPatch && !bswUaSpec.osPatch ) {
+					precision += ptsMap.os || 0;
+				}
 
 				return valid === true ? precision : 0;
 			}
