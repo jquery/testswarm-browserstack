@@ -13,7 +13,8 @@
 module.exports = {
 	browserFamily: {
 		'Yandex Browser': 'yandex',
-		'Android': 'Android Browser'
+		'Android': 'Android Browser',
+		'Chrome Mobile': 'Android Browser'
 	},
 	osFamily: {
 		'Windows': 'Windows',

@@ -380,11 +380,10 @@ self = {
 					// "Android Browser" (even the ones that use "Chrome Mobile" in Android 4.4+).
 					// Instead of mapping all this (which would require complicating mapHelper to
 					// map browserFamily "Chrome" to "Android Browser", if osFamily is "Android"),
-					// simply ignore browserFamily for Android and iOS.
-					if ( key === 'browserFamily' &&
-						tsUaSpec.osFamily === 'Android' &&
-						tsUaSpec.osMajor &&
-						tsUaSpec.osMinor
+					// simply ignore browserFamily for Android if it's set to "Chrome".
+					// "Android" & "Chrome Mobile" are both mapped to "Android Browser".
+					if ( key === 'browserFamily' && tsUaSpec.osFamily === 'Android' &&
+						value === 'Chrome'
 					) {
 						return;
 					}
