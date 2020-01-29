@@ -283,6 +283,10 @@ self = {
 				key;
 
 			/**
+			 * Similarity of a given BrowserStack worker to the TestSwarm UA requirement.
+			 *
+			 * This is used to device which worker to spawn for a given TestSwarm "need".
+			 * 
 			 * @param {Object} bswDesc BrowserStack worker descriptor
 			 * @param {string} bswDesc.browser
 			 * @param {string} bswDesc.browser_version
@@ -293,9 +297,11 @@ self = {
 			 * @param {string} tsUaSpec.browserFamily
 			 * @param {string} tsUaSpec.browserMajor
 			 * @param {string} tsUaSpec.browserMinor
+			 * @param {string} tsUaSpec.browserPatch
 			 * @param {string} tsUaSpec.osFamily
 			 * @param {string} tsUaSpec.osMajor
 			 * @param {string} tsUaSpec.osMinor
+			 * @param {string} tsUaSpec.osPatch
 			 * @param {string} tsUaSpec.deviceFamily
 			 * @return number
 			 */
@@ -347,14 +353,14 @@ self = {
 					// If a property from the TestSwarm requirement doesn't exist in the BrowserStack
 					// worker description, assume it doesn't match.
 					// E.g. If tsUaSpec requires a major+minor version (e.g. "21.1"), but BrowserStack
-					// only specifies the major version.
+					// only specifies the major version, then by definition we can't be sure it matches.
 					if ( !bswUaSpec[ key ] ) {
 						valid = false;
 						return;
 					}
 
-					// Process wildcards
-					// This requires the wildcard to be the last specified segment.
+					// Process wildcards in TestSwarm UA requirement.
+					// We only support wildcards as the last specified segment.
 					// "major: 4, minor: 1*" is fine.
 					// "major: 4, minor: 1*, patch: 2" is unsupported.
 					if ( /(Major|Minor|Patch)$/.test( key ) && value.substr( -1 ) === '*' ) {
@@ -406,6 +412,21 @@ self = {
 
 					precision += pts;
 				} );
+
+				// Handle the "os" field in a special way - some browsers on BrowserStack only
+				// define the major part and we want TestSwarm able to prefer them when there's
+				// another entry with a matching major that also specifies the minor.
+				// One example is iOS: BrowserStack offers both "10" & "10.3" workers; the former
+				// is a real device and the latter is an emulator; we want the real device.
+				// If TestSwarm specifies "10" as requirement (no minor), and the worker spec
+				// specifies no minor either, consider equal absence of value as a positive match
+				// and give precision points for it.
+				if ( !tsUaSpec.osMinor && !bswUaSpec.osMinor ) {
+					precision += ptsMap.os || 0;
+				}
+				if ( !tsUaSpec.osPatch && !bswUaSpec.osPatch ) {
+					precision += ptsMap.os || 0;
+				}
 
 				return valid === true ? precision : 0;
 			}
