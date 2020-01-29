@@ -1,5 +1,6 @@
 language: node_js
 node_js:
+  # swarm01 runs Node.js 4.x
   - "4"
   - "8"
 notifications:
