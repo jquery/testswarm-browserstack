@@ -286,7 +286,7 @@ self = {
 			 * Similarity of a given BrowserStack worker to the TestSwarm UA requirement.
 			 *
 			 * This is used to device which worker to spawn for a given TestSwarm "need".
-			 * 
+			 *
 			 * @param {Object} bswDesc BrowserStack worker descriptor
 			 * @param {string} bswDesc.browser
 			 * @param {string} bswDesc.browser_version
@@ -306,7 +306,7 @@ self = {
 			 * @return number
 			 */
 			function compare( bswDesc, tsUaSpec ) {
-				var valid, precision, bswUaSpec, parts;
+				var valid, precision, bswUaSpec, parts, versionMatch;
 
 				valid = true;
 				precision = 0;
@@ -329,7 +329,14 @@ self = {
 				}
 				// Some browserstack workers don't define browser_version.
 				if ( bswDesc.browser_version ) {
-					parts = bswDesc.browser_version.split( '.' );
+
+					// BrowserStack appends "beta" to the end of the version of unstable
+					// browser versions.
+					// Example browser_version values: "80.0", "80.0 beta", "70.1.5"
+					versionMatch = bswDesc.browser_version.match( /([\d.]+)( [a-zA-Z]+)?/ );
+					bswUaSpec.isStable = !versionMatch[ 2 ];
+
+					parts = versionMatch[ 1 ].split( '.' );
 					bswUaSpec.browserMajor = parts[ 0 ];
 					bswUaSpec.browserMinor = parts[ 1 ];
 					bswUaSpec.browserPatch = parts[ 2 ];
@@ -428,6 +435,11 @@ self = {
 					precision += ptsMap.os || 0;
 				}
 
+				// If a stable & beta versions are an equal match, prefer the stable one.
+				if ( bswUaSpec.isStable ) {
+					precision += ptsMap.isStable || 0;
+				}
+
 				return valid === true ? precision : 0;
 			}
 
@@ -457,14 +469,16 @@ self = {
 
 			userAgents = results.swarmstate.userAgents;
 
-			// browser data: 100 pt
-			// os data: 10 pt
-			// device data: 1pt
-			// asumption: each data set has no more than 9 keys
+			// browser data: 1000 pt
+			// os data: 100 pt
+			// device data: 10 pt
+			// if a browser is stable, we give an extra 1 pt
+			// assumption: each data set has no more than 9 keys
 			ptsMap = {
-				browser: 100,
-				os: 10,
-				device: 1
+				browser: 1000,
+				os: 100,
+				device: 10,
+				isStable: 1
 			};
 
 			// This is a hack for the fixWorker() function.
