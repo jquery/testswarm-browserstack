@@ -334,6 +334,14 @@ self = {
 					// browser versions.
 					// Example browser_version values: "80.0", "80.0 beta", "70.1.5"
 					versionMatch = bswDesc.browser_version.match( /([\d.]+)( [a-zA-Z]+)?/ );
+
+					// Skip browsers with non-numerical versions like Edge Insider Preview
+					// which has `browser_version` set to "insider preview".
+					if ( !versionMatch ) {
+						valid = false;
+						return;
+					}
+
 					bswUaSpec.isStable = !versionMatch[ 2 ];
 
 					parts = versionMatch[ 1 ].split( '.' );
