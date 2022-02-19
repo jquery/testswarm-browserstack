@@ -6,7 +6,11 @@
     "testswarm",
     "browserstack"
   ],
-  "homepage": "https://github.com/clarkbox/testswarm-browserstack",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jquery/testswarm-browserstack.git"
+  },
+  "homepage": "https://github.com/jquery/testswarm-browserstack",
   "author": {
     "name": "clarkbox",
     "web": "https://github.com/clarkbox"
@@ -21,10 +25,6 @@
   "files": [
     "src/"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/clarkbox/testswarm-browserstack.git"
-  },
   "scripts": {
     "test": "eslint .",
     "fix": "eslint --fix ."
@@ -38,7 +38,7 @@
     "underscore": "^1.4.2"
   },
   "devDependencies": {
-    "eslint": "^3.18.0",
-    "eslint-config-jquery": "^1.0.1"
+    "eslint": "^7.32.0",
+    "eslint-config-jquery": "^3.0.0"
   }
 }
