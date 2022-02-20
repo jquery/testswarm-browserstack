@@ -1,4 +1,5 @@
-# Using/installing software
+/.nyc_output/
+/coverage/
 /node_modules
 /package-lock.json
 /config.json
@@ -6,5 +7,4 @@
 /run.log
 /run.sh
 
-# Other files
 .DS_Store

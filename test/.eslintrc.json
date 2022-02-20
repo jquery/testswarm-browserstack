@@ -1,0 +1,15 @@
+{
+	"root": true,
+	"extends": "jquery",
+	"parserOptions": {
+		"ecmaVersion": 2017
+	},
+	"env": {
+		"node": true,
+		"qunit": true
+	},
+	"rules": {
+		"lines-around-comment": 0,
+		"quotes": [ 2, "single" ]
+	}
+}

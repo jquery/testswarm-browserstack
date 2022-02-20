@@ -26,7 +26,8 @@
     "src/"
   ],
   "scripts": {
-    "test": "eslint .",
+    "test": "qunit && eslint .",
+    "test-cover": "nyc qunit",
     "fix": "eslint --fix ."
   },
   "dependencies": {
@@ -39,6 +40,17 @@
   },
   "devDependencies": {
     "eslint": "^7.32.0",
-    "eslint-config-jquery": "^3.0.0"
+    "eslint-config-jquery": "^3.0.0",
+    "nock": "^13.2.4",
+    "nyc": "^15.1.0",
+    "qunit": "^2.18.0"
+  },
+  "nyc": {
+    "temp-dir": ".nyc_output/",
+    "report-dir": "coverage/",
+    "reporter": [
+      "text",
+      "html"
+    ]
   }
 }

@@ -845,7 +845,7 @@ module.exports = {
 				throw err;
 			}
 			mapCache = results.map;
-			callback( self );
+			callback( null, self );
 		} );
 	}
 };
