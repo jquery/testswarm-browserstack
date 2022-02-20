@@ -100,7 +100,7 @@ if ( !cliConfig ) {
 }
 
 tsbs.extendConfig( cliConfig );
-tsbs.init( function( tsbs ) {
+tsbs.init( function( _err, tsbs ) {
 
 	config = tsbs.getConfig();
 

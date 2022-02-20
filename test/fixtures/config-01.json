@@ -1,0 +1,10 @@
+{
+	"browserstack": {
+		"user": "foobar-testswarm",
+		"pass": "0000000"
+	},
+	"testswarm": {
+		"root": "http://swarm.example",
+		"runUrl": "https://swarm.example/run/foobar?run_token=0000000"
+	}
+}

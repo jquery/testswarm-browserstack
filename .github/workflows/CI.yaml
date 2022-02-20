@@ -33,4 +33,8 @@ jobs:
           node-version: ${{ matrix.node }}
 
       - run: npm install
+
       - run: npm test
+
+      - name: Coverage
+        run: npm run test-cover
