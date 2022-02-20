@@ -1,5 +1,4 @@
-var colors = require( 'colors' ),
-	logColors;
+var colors = require( 'colors' );
 
 colors.mode = require( 'tty' ).isatty( process.stdout.fd ) ? 'console' : 'none';
 
@@ -62,7 +61,7 @@ function getHash( val ) {
 	return JSON.stringify( val, getHash.replacer );
 }
 
-getHash.replacer = function( key, val ) {
+getHash.replacer = function( _key, val ) {
 	var normalized, keys, i, len;
 	if ( !Array.isArray( val ) && Object( val ) === val ) {
 		// Only normalize objects when the key-order is ambiguous
@@ -95,7 +94,7 @@ function generateReverseMap( map ) {
 	return rev;
 }
 
-logColors = {
+var logColors = {
 	dryRun: 'cyan',
 	spawn: 'green',
 	terminate: 'yellow',

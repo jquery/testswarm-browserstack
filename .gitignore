@@ -1,9 +1,10 @@
 # Using/installing software
-node_modules
-config.json
-logrotate.conf
-run.log
-run.sh
+/node_modules
+/package-lock.json
+/config.json
+/logrotate.conf
+/run.log
+/run.sh
 
 # Other files
 .DS_Store

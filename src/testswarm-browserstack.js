@@ -80,7 +80,7 @@ function fixWorker( worker ) {
 		}
 
 		worker.browser = obj;
-	};
+	}
 	return worker;
 }
 
@@ -231,7 +231,7 @@ self = {
 		 */
 		getState: function( callback ) {
 			request.get( config.testswarm.root + '/api.php?action=swarmstate',
-				function( err, res, body ) {
+				function( err, _res, body ) {
 					var apiData;
 					if ( err ) {
 						callback( {
@@ -818,7 +818,7 @@ self = {
 					}
 				} );
 			}
-		}, function( err, results ) {
+		}, function( _err, results ) {
 			self.runInternal( results.currentWorkers, results.swarmState );
 		} );
 	}

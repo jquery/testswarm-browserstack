@@ -1,7 +1,9 @@
-[![Build Status](https://travis-ci.org/clarkbox/testswarm-browserstack.svg?branch=master)](https://travis-ci.org/clarkbox/testswarm-browserstack) [![npm](https://img.shields.io/npm/v/testswarm-browserstack.svg?style=flat)](https://www.npmjs.com/package/testswarm-browserstack)
-
+[![Build Status](https://github.com/jquery/testswarm-browserstack/actions/workflows/CI.yaml/badge.svg?event=push)](https://github.com/jquery/testswarm-browserstack/actions/workflows/CI.yaml)
+[![npm](https://img.shields.io/npm/v/testswarm-browserstack.svg?style=flat)](https://www.npmjs.com/package/testswarm-browserstack)
+[![Tested with QUnit](https://img.shields.io/badge/tested_with-qunit-9c3493.svg)](https://qunitjs.com/)
 
 # testswarm-browserstack
+
 This is a lightweight integration layer between [TestSwarm](https://github.com/jquery/testswarm) and [BrowserStack](https://www.browserstack.com/). Use it to spawn BrowserStack workers needed by TestSwarm on demand. It uses [node-browserstack](https://github.com/scottgonzalez/node-browserstack) to abstract the BrowserStack API.
 
 This script is currently compatible with:
@@ -9,7 +11,7 @@ This script is currently compatible with:
 * [BrowserStack API](https://github.com/browserstack/api) v4
 
 ## Install
---------------------------------------
+
 ```bash
 git clone https://github.com/clarkbox/testswarm-browserstack.git testswarm-browserstack
 cd testswarm-browserstack/
@@ -17,8 +19,8 @@ npm install
 ```
 
 
-## How to use CLI:
---------------------------------------
+## How to use CLI
+
 ```bash
 node src/cli.js --run
 ```
@@ -28,15 +30,13 @@ This above command will create and terminate BrowserStack workers as needed acco
 If you plan to run it from a scheduler and keep log files, you're recommended to use the `run-sample.sh` file as a start. It contains the basic cli invocation as a template. Fill in the argument values and adjust the script and log paths. Also, as a reminder that log files can run out of hand quickly, we've provided a sample file to use in `logrotate` (e.g. on Ubuntu). To learn about logrotate, checkout [Ubuntu manpages](http://manpages.ubuntu.com/manpages/hardy/man8/logrotate.8.html) or the [Slicehost tutorial](http://articles.slicehost.com/2010/6/30/understanding-logrotate-on-ubuntu-part-1) on the subject. To install it, copy the file to `logrotate.conf` within this directory, adjust the path and (if you want to) set different settings. Then move it to `/etc/logrotate.d/testswarm-browserstack.conf`.
 
 
-## Main scripts:
---------------------------------------
+### Main scripts
 
 1. [testswarm-browserstack.js](https://github.com/clarkbox/testswarm-browserstack/blob/master/src/testswarm-browserstack.js) - Abstraction of TestSwarm API, and Scott González's BrowserStack API. Use it to automatically spawn BrowserStack workers based on your swarm's needs.
 1. [cli.js](https://github.com/clarkbox/testswarm-browserstack/blob/master/src/cli.js) - nodejs cli wrapper around it all. Allows for scripted or generally easy manual invocation of the script.
 
 
-## testswarm-browserstack.js
---------------------------------------
+### testswarm-browserstack.js
 
 #### Options documentation:
 * `browserstack.user`: BrowserStack username
@@ -65,8 +65,7 @@ If you plan to run it from a scheduler and keep log files, you're recommended to
 }
 ```
 
-##  cli.js
---------------------------------------
+###  cli.js
 
 This is a nodejs cli wrapper around testswarm-browserstack.js. You can use it independent of testswarm. Use --help to get all the information you need to know (see above for example usage):
 
